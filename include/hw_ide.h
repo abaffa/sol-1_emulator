@@ -24,8 +24,8 @@
 
 struct hw_ide {
 
-	int gambi_ide_total;
-	int gambi_ide_read;
+	int ide_total_block_bytes;
+	int ide_read_count;
 
 	BAFFA1_BYTE data[8];
 
@@ -43,4 +43,5 @@ void hw_ide_print(struct hw_ide* hw_ide, char *dir, int changed, char *print);
 
 void hw_ide_save_disk(BAFFA1_BYTE *data);
 void hw_ide_load_disk(BAFFA1_BYTE *data);
+void hw_ide_load_bkpdisk(BAFFA1_BYTE *data);
 #endif

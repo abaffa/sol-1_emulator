@@ -20,7 +20,10 @@
 
 #include "baffa1_cpu.h"
 
-void debugmenu_main_menu(HW_TTY& hw_tty);
+void debugmenu_main_menu(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty);
+
+void debugmenu_main_set_mem_bank(BAFFA1_MEMORY& memory, HW_TTY& hw_tty);
+void debugmenu_main_set_mem_offset(BAFFA1_MEMORY& memory, HW_TTY& hw_tty);
 void debugmenu_main_disassemble_mem(HW_TTY& hw_tty);
 void debugmenu_main_edit_mem(BAFFA1_MEMORY& memory, HW_TTY& hw_tty);
 void debugmenu_main_fill_mem(BAFFA1_MEMORY& memory, HW_TTY& hw_tty);
@@ -31,6 +34,9 @@ void debugmenu_main_edit_breakpoint(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty);
 void debugmenu_main_edit_programcounter(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty);
 void debugmenu_main_reset_cpu(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty);
 
+
+void debugmenu_nextpage_mem(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty, int size);
+void debugmenu_lastpage_mem(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty, int size);
 
 int debugmenu_main(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty);
 

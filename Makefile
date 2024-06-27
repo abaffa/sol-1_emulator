@@ -5,7 +5,7 @@ FLAGS = -O3 -std=c++11
 OBJECTS=./build/utils.o ./build/tasm_opcode.o ./build/baffa1_rom.o ./build/baffa1_register_8bit.o ./build/baffa1_registers.o ./build/baffa1_microcode.o ./build/baffa1_memory.o ./build/baffa1_alu_4bit.o ./build/baffa1_alu.o ./build/queue_ll.o ./build/linkedlist.o ./build/hw_web.o ./build/hw_uart.o ./build/hw_tty.o ./build/hw_timer.o ./build/hw_rtc.o ./build/hw_ide.o ./build/debugmenu_roms.o ./build/debugmenu_main.o ./build/baffa1_cpu.o ./build/baffa1_bus.o ./build/baffa1_computer.o
 
 all: ${OBJECTS} 
-	gcc ${FLAGS} ${INCLUDES} ./src/main.cpp ${OBJECTS} -L ./lib -lmingw32 -lstdc++ -o ./bin/main.exe	
+	gcc ${FLAGS} ${INCLUDES} ./src/main.cpp ${OBJECTS} -L ./lib -lmingw32 -lstdc++ -lSDL2main -lSDL2 -lm -lncurses -pthread -o ./bin/main.exe	
 
 ./build/baffa1_computer.o:src/baffa1_computer.cpp
 	gcc ${FLAGS} ${INCLUDES} ./src/baffa1_computer.cpp -c -o ./build/baffa1_computer.o

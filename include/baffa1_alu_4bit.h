@@ -22,7 +22,7 @@
 
 struct baffa1_alu_4bit
 {
-	BAFFA1_BYTE alu_output;
+	BAFFA1_BYTE F;
 	BAFFA1_BYTE COUT; //carry out
 
 	BAFFA1_BYTE EQ; //EQ

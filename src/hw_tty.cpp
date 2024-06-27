@@ -18,205 +18,429 @@
 #include "hw_tty.h"
 #include "baffa1_computer.h"
 #include <stdio.h>
-#include <utils.h>
+#include <iostream>
 
-#ifdef _MSC_VER    
+
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 #include <windows.h>
 #include <conio.h>
 #else
-#include <pthread.h> 
+//#include <pthread.h> 
 #endif
 
-#ifdef _MSC_VER    
+
+
+//TELNET PROTOCOL
+//
+//https://datatracker.ietf.org/doc/html/rfc1116
+//https://tools.ietf.org/html/rfc854
+//https://datatracker.ietf.org/doc/html/rfc854#page-14
+//https://tools.ietf.org/html/rfc855
+//https://datatracker.ietf.org/doc/html/rfc858
+//https://datatracker.ietf.org/doc/rfc930/
+//https://en.wikipedia.org/wiki/Telnet#Related_RFCs
+//http://www.iana.org/assignments/telnet-options/telnet-options.xhtml
+//
+#define T_SE      (uint8_t)240 // 0xf0
+#define T_NOP     (uint8_t)241 // 0xf1
+#define T_BREAK   (uint8_t)243 // 0xf3
+#define T_GOAHEAD (uint8_t)249 // 0xf9
+#define T_SB      (uint8_t)250 // 0xfa
+#define T_WILL    (uint8_t)251 // 0xfb
+#define T_WONT    (uint8_t)252 // 0xfc
+#define T_DO      (uint8_t)253 // 0xfd
+#define T_DONT    (uint8_t)254 // 0xfe
+#define T_IAC     (uint8_t)255 // 0xff
+
+#define TO_SEND_BINARY        (uint8_t)0
+#define TO_ECHO               (uint8_t)1
+#define TO_SUPPRESS_GO_AHEAD  (uint8_t)3
+#define TO_TERMINAL_TYPE      (uint8_t)24
+#define TO_LINEMODE           (uint8_t)34
+
+
+void transmit_welcome(HW_TTY_CLIENT *current_client) {
+
+#if defined(_MSC_VER) || defined(__MINGW32__)    
+	SOCKET client = (current_client)->client;
+#else
+	int client = (current_client)->client;
+#endif
+
+	uint8_t  welcome_buf[10] = { T_IAC, T_DO, TO_LINEMODE, T_IAC, T_WILL, TO_ECHO, 0x0 };
+	send(client, reinterpret_cast<const char*>(welcome_buf), 7, 0);
+
+	char welm[512];
+	sprintf(welm, "Baffa-1 74HC HomebrewCPU MiniComputer.\r\n");
+	sprintf(welm + strlen(welm), "Emulator Version 1.0\r\n");
+	sprintf(welm + strlen(welm), "\r\n");
+	sprintf(welm + strlen(welm), "terminal-%d initialized\r\n", (current_client->index + 1));
+	send(client, welm, (int)strlen(welm), 0);
+	
+	char *buf_send = (char *)"\r\nPassword: ";
+	send(client, buf_send, (int)strlen(buf_send), 0);
+}
+
+uint8_t transmit_bytes(HW_TTY_CLIENT *current_client) {
+
+#if defined(_MSC_VER) || defined(__MINGW32__)    
+	SOCKET client = (current_client)->client;
+#else
+	int client = (current_client)->client;
+#endif
+
+	if (!current_client->tty_out.empty()) {
+
+#if defined(_MSC_VER) || defined(__MINGW32__)    
+		std::unique_lock<std::mutex> lock(current_client->mtx_out);
+#else
+		//pthread_mutex_lock(&current_client->mtx_out);
+#endif
+
+		BAFFA1_BYTE data = current_client->tty_out.front(); current_client->tty_out.pop();
+
+#if defined(_MSC_VER) || defined(__MINGW32__)    
+		current_client->cv_out.notify_all();
+#else
+		//pthread_mutex_unlock(&current_client->mtx_out);
+#endif
+
+		char buf_send[4];
+		buf_send[0] = data;
+		buf_send[1] = '\0';
+		buf_send[2] = '\0';
+		buf_send[3] = '\0';
+
+		if (buf_send[0] == 0x08) { //CONVERT BS TO DEL
+			buf_send[1] = 0x20;
+			buf_send[2] = 0x08;
+		}
+
+		if (current_client->lastSentChar == '\r' && data != '\n')
+			send(client, "\n", 1, 0);
+
+		int send_status = send(client, buf_send, (int)strlen(buf_send), 0);
+
+		if (current_client->lastSentChar == '\n' &&  data != '\n')
+			current_client->lastSentChar = '\0';
+		else
+			current_client->lastSentChar = data;
+
+		if (send_status <= 0)
+			return 0;
+
+		
+	}
+
+	return 1;
+}
+
+void process_received_byte(HW_TTY_CLIENT *current_client, uint8_t b) {
+	if (*(current_client->console) == 0) {
+		if (b == 0x04)
+		{
+			*(current_client->debug_call) = 1;
+		}
+		else {
+			current_client->_hw_uart->receive(b);
+			//current_client->baffa1_cpu.microcode.mccycle.int_request = 0x01;
+		}
+	}
+	else if (*(current_client->console) == 1) {
+		//HW_TTY::net_data *net_data = (HW_TTY::net_data*)malloc(sizeof(HW_TTY::net_data));
+		current_client->tty_in->push(b);
+	}
+}
+
+
+uint8_t process_special_key(HW_TTY_CLIENT *current_client, uint8_t *local_buff) {
+
+	if (*local_buff == 0x7F) //CONVERT DEL TO BS
+		*local_buff = 0x08;
+
+	if (current_client->receivedCR == 0 && *local_buff == 0x0A)		current_client->receivedCR = 0x0A;
+	else if (current_client->receivedCR == 0 && *local_buff == 0x0D)	current_client->receivedCR = 0x0D;
+	else if ((current_client->receivedCR == 0x0A && *local_buff == 0x0D) || (current_client->receivedCR == 0x0D && *local_buff == 0x0)) return 2;
+	else return 1;
+
+	return 0;
+}
+
+uint8_t receive_bytes(HW_TTY_CLIENT *current_client, BAFFA1_BYTE *receiv_buff) {
+
+#if defined(_MSC_VER) || defined(__MINGW32__)    
+	SOCKET client = (current_client)->client;
+#else
+	int client = (current_client)->client;
+#endif
+
+	if (current_client->proc_receiv_count == 0) {
+		current_client->receiv_total = recv(client, (char *)receiv_buff, 1, 0);// MSG_WAITALL);
+	}
+
+	if (current_client->receiv_total > 0) {
+
+		if (current_client->proc_receiv_count < current_client->receiv_total) {
+			uint8_t local_buff = receiv_buff[current_client->proc_receiv_count++];
+
+			if (current_client->subnegotiation)
+			{
+				if (current_client->handleTelnetProtocol) { printf("<%02x", local_buff); }
+
+				if (current_client->cmdLen == 0 && local_buff == T_IAC) current_client->cmdLen = 1;
+				else if (current_client->cmdLen == 1 && local_buff == T_SE)
+				{
+					current_client->subnegotiation = false;
+					current_client->cmdLen = 0;
+				}
+				else current_client->cmdLen = 0;
+
+
+
+			}
+			// ---- handle IAC sequences
+
+			else if (current_client->cmdLen == 0)
+			{
+				// waiting for IAC uint8_t
+				if (local_buff == T_IAC)
+				{
+					current_client->cmdLen = 1;
+					current_client->cmd[0] = T_IAC;
+					if (current_client->handleTelnetProtocol) { printf("<%02x", local_buff); }
+				}
+				else {
+					// Process received bytes from Telnet
+
+					uint8_t _do = process_special_key(current_client, &local_buff);
+
+
+					if (current_client->user_validated == 1) {
+						if (_do == 2) {
+							current_client->receivedCR = 0;
+							process_received_byte(current_client, 0x0D);
+							process_received_byte(current_client, 0x0A);
+						}
+						else if (_do == 1) {
+							if (current_client->receivedCR != 0) process_received_byte(current_client, current_client->receivedCR);
+
+							current_client->receivedCR = 0;
+							process_received_byte(current_client, local_buff);
+						}
+					}
+					else {
+						if (_do == 2) {
+							current_client->receivedCR = 0;
+							if (strcmp(current_client->passBuffer, tty_password) == 0) {
+								current_client->user_validated = 1;
+
+								process_received_byte(current_client, 0x0D);
+								process_received_byte(current_client, 0x0A);
+							}
+							else {
+								current_client->passBuffer[0] = 0;
+								char *buf_send = (char *)"\r\nPassword: ";
+								send(client, buf_send, (int)strlen(buf_send), 0);
+							}
+						}
+						else if (_do == 1) {
+							current_client->receivedCR = 0;
+
+							uint8_t s = (uint8_t)strlen(current_client->passBuffer);
+
+							if (s <= 20) {
+								current_client->passBuffer[s] = local_buff;
+								current_client->passBuffer[s+1] = 0;
+							}
+						}
+					}
+
+				}
+			}
+			else if (current_client->cmdLen == 1)
+			{
+				if (current_client->handleTelnetProtocol) { printf("<%02x", local_buff); }
+				// received second uint8_t of IAC sequence
+				if (local_buff == T_IAC)
+				{
+					// IAC->IAC sequence means regular 0xff data value
+					current_client->cmdLen = 0;
+
+					// we already skipped the first IAC (0xff), so just return 'false' to pass this one through
+
+				}
+				else if (local_buff == T_NOP || local_buff == T_BREAK || local_buff == T_GOAHEAD)
+				{
+					// NOP, BREAK, GOAHEAD => do nothing and skip
+					current_client->cmdLen = 0;
+
+				}
+				else if (local_buff == T_SB)
+				{
+					// start of sub-negotiation
+					current_client->subnegotiation = true;
+					current_client->cmdLen = 0;
+
+				}
+				else
+				{
+					// record second uint8_t of sequence
+					current_client->cmdLen = 2;
+					current_client->cmd[1] = local_buff;
+
+				}
+			}
+			else if (current_client->cmdLen == 2)
+			{
+				// received third (i.e. last) uint8_t of IAC sequence
+				if (current_client->handleTelnetProtocol) { printf("<%02x", local_buff); }
+				current_client->cmd[2] = local_buff;
+
+				bool reply = true;
+				if (current_client->cmd[1] == (char)T_WILL)
+				{
+					switch (current_client->cmd[2])
+					{
+					case TO_SEND_BINARY:          current_client->cmd[1] = T_DO;   break;
+					case TO_ECHO:                 current_client->cmd[1] = current_client->telnetDisableLocalEcho ? T_DONT : T_DO; break;
+					case TO_SUPPRESS_GO_AHEAD:    current_client->cmd[1] = T_DO; break;
+					default:   current_client->cmd[1] = T_DONT; break;
+					}
+				}
+				else if (current_client->cmd[1] == (char)T_WONT)
+				{
+					switch (current_client->cmd[2])
+					{
+					case TO_SEND_BINARY:   current_client->cmd[1] = T_DO; break;
+					default:			   current_client->cmd[1] = T_DONT; break;
+					}
+
+				}
+				else if (current_client->cmd[1] == T_DO)
+				{
+					switch (current_client->cmd[2])
+					{
+					case TO_SEND_BINARY:         current_client->cmd[1] = T_WILL;  break;
+					case TO_SUPPRESS_GO_AHEAD:   current_client->cmd[1] = T_WILL; break;
+					case TO_TERMINAL_TYPE:       current_client->cmd[1] = current_client->telnetTerminalType == 0 ? T_WONT : T_WILL; break;
+					case TO_ECHO:                current_client->cmd[1] = current_client->telnetDisableLocalEcho ? T_WILL : T_WONT; break;
+					default:   current_client->cmd[1] = T_WONT; break;
+					}
+				}
+				else if (current_client->cmd[1] == T_DONT)
+				{
+					switch (current_client->cmd[2])
+					{
+					case TO_SEND_BINARY:   current_client->cmd[1] = T_WILL;   break;
+					default:   current_client->cmd[1] = T_WONT; break;
+					}
+
+				}
+				else
+					reply = false;
+
+				// send reply if necessary
+				if (reply)
+				{
+					if (current_client->handleTelnetProtocol)
+						for (int k = 0; k < 3; k++)
+						{
+							printf(">%02x", (uint8_t)current_client->cmd[k]);
+						}
+
+					send(client, reinterpret_cast<const char*>(current_client->cmd), 3, 0);
+
+					if (current_client->cmd[1] == T_WILL && current_client->cmd[2] == TO_TERMINAL_TYPE)
+					{
+						// send terminal-type subnegoatiation sequence
+						uint8_t buf[110], i, n = 0;
+						buf[n++] = T_IAC;
+						buf[n++] = T_SB;
+						buf[n++] = TO_TERMINAL_TYPE;
+						buf[n++] = 0; // IS
+						for (i = 0; i < 100 && current_client->telnetTerminalType[i] >= 32 && current_client->telnetTerminalType[i] < 127; i++)
+							buf[n++] = current_client->telnetTerminalType[i];
+						buf[n++] = 0;
+						buf[n++] = T_IAC;
+						buf[n++] = T_SE;
+
+						send(client, reinterpret_cast<const char*>(buf), n, 0);
+
+						if (current_client->handleTelnetProtocol)
+							for (int k = 0; k < n; k++) { printf(">%02x", (uint8_t)buf[k]); }
+					}
+				}
+
+				// start over
+				current_client->cmdLen = 0;
+
+			}
+			else
+			{
+				// invalid state (should never happen) => just reset
+				current_client->cmdLen = 0;
+
+			}
+		}
+		else {
+			current_client->receiv_total = 0;
+			current_client->proc_receiv_count = 0;
+			memset(receiv_buff, 0, 512 * (sizeof(receiv_buff[0])));
+		}
+
+	}
+	else if (current_client->receiv_total == 0) 
+		return 0;
+
+	return 1;
+}
+
+
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 DWORD WINAPI TelnetClientThread(LPVOID pParam)
 #else
 void *TelnetClientThread(void *pParam)
 #endif
 {
-	
 	HW_TTY_CLIENT *current_client = (HW_TTY_CLIENT*)pParam;
 
-
-	char welm[512];
-	BAFFA1_BYTE buff[512];
-	int n;
-	int x = 0;
-
-	BAFFA1_BYTE lastchar = 0;
-	BAFFA1_BYTE startCMD = 0x00;
-
-#ifdef _MSC_VER    
-	SOCKET client = *(current_client)->client;
+	BAFFA1_BYTE receiv_buff[0x200];// FFFF];
+	   
+#if defined(_MSC_VER) || defined(__MINGW32__)    
+	SOCKET client = (current_client)->client;
 #else
-	int client = *(current_client)->client;
+	int client = (current_client)->client;
 #endif
 
-	//https://datatracker.ietf.org/doc/html/rfc1116
-	//https://tools.ietf.org/html/rfc854
-	//https://datatracker.ietf.org/doc/html/rfc854#page-14
-	//https://tools.ietf.org/html/rfc855
-	//https://datatracker.ietf.org/doc/html/rfc858
-	//https://datatracker.ietf.org/doc/rfc930/
-	//https://en.wikipedia.org/wiki/Telnet#Related_RFCs
-	//http://www.iana.org/assignments/telnet-options/telnet-options.xhtml
-	//ByteString(-1, -5, 31, -1, -5, 32, -1, -5, 24, -1, -5, 39, -1, -3, 1, -1, -5, 3, -1, -3, 3),
-	//ByteString(-1, -2, 31, -1, -2, 32, -1, -2, 24, -1, -2, 39, -1, -4, 1),
-	//ByteString(-1, -5, 36),
-	//ByteString(-1, -2, 36)
-	//-1 -5 31 = IAC WILL NAWS
-	//-1 -5 32 = IAC WILL TERMINAL-SPEED
-	//-1 -5 24 = IAC WILL TERMINAL-TYPE
-	//-1 -5 39 = IAC WILL NEW-ENVIRON
-	//-1 -3 1  = IAC DO   ECHO
-	//-1 -5 3  = IAC WILL SUPPRESS-GO-AHEAD
-	//-1 -3 3  = IAC DO   SUPPRESS-GO-AHEAD
-	//-1 -2 31 = IAC DONT NAWS
-	//-1 -2 32 = IAC DONT TERMINAL-SPEED
-	//-1 -2 24 = IAC DONT TERMINAL-TYPE
-	//-1 -2 39 = IAC DONT NEW-ENVIRON
-	//-1 -4 1  = IAC WONT ECHO
-	//-1 -5 36 = IAC WILL ENVIRON
-	//-1 -2 36 = IAC DONT ENVIRON
-	send(client, "\377\375\042\377\373\001\r\n", 6, 0);
-
-
-	sprintf(welm, "Baffa-1 74HC HomebrewCPU MiniComputer.\r\n");
-	sprintf(welm + strlen(welm), "Emulator Version 0.01\r\n");
-	sprintf(welm + strlen(welm), "\r\n");
-	sprintf(welm + strlen(welm), "terminal-%d initialized\r\n", (current_client->index + 1));
-	send(client, welm, (int)strlen(welm), 0);
-
-	//hw_uart_receive(current_client->hw_uart, 0x0d);
-	//memset(welm, 0, 512 * (sizeof buff[0]));
-
-	char lastSentChar = '\0';
+	transmit_welcome(current_client);
 
 	while (true)
 	{
-		//sprintf("%02x -> %04x\n", current_client->index, current_client->client);
 
+		if (current_client->user_validated == 1)
+			if (!transmit_bytes(current_client)) break;
 
-
-		if (!current_client->tty_out.empty()) {
-
-
-#ifdef _MSC_VER    
-			std::unique_lock<std::mutex> lock(current_client->mtx_out);
-#else
-			pthread_mutex_lock(&current_client->mtx_out);
-#endif
-
-			BAFFA1_BYTE data = current_client->tty_out.front(); current_client->tty_out.pop();
-
-#ifdef _MSC_VER    
-			current_client->cv_out.notify_all();
-#else
-			pthread_mutex_unlock(&current_client->mtx_out);
-#endif
-
-			char buf_send[4];
-			buf_send[0] = data;
-			buf_send[1] = '\0';
-			buf_send[2] = '\0';
-			buf_send[3] = '\0';
-
-			if (buf_send[0] == 0x08) { //CONVERT BS TO DEL
-				buf_send[1] = 0x20;
-				buf_send[2] = 0x08;
-			}
-
-			if (lastSentChar == '\r' && data != '\n')
-				send(client, "\n", 1, 0);
-
-			send(client, buf_send, (int)strlen(buf_send), 0);
-
-			if (lastSentChar == '\n' &&  data != '\n')
-				lastSentChar = '\0';
-			else
-				lastSentChar = data;
-
-		}
-		//std::unique_lock<std::mutex> unlock(current_client->mtx_out);
-
-
-
-
-		if (x == 0)
-			n = recv(client, (char *)buff, 1, 0);// MSG_WAITALL);
-
-
-
-		if (n > 0) {
-			//if (RecvBytes > 0) {
-
-			if (x < n) {
-
-				if (buff[x] == 0xFF) {
-					startCMD = 0x01;
-					lastchar = buff[x];
-				}
-				else if (startCMD == 0x01 && buff[x] == 0xFA) {
-					startCMD = 0x02;
-					lastchar = buff[x];
-				}
-				else if (startCMD == 0x02 && buff[x] == 0xF0) {
-					startCMD = 0x00;
-					lastchar = buff[x];
-				}
-				else if (startCMD == 0x01 && lastchar == 0xFF) {
-					lastchar = buff[x];
-				}
-				else if (startCMD == 0x01) {
-					startCMD = 0x00;
-					lastchar = buff[x];
-				}
-				else if (startCMD == 0x00 && buff[x] != 0x00 && buff[x] != 0x0a) {
-					if (buff[x] == 0x7F) //CONVERT DEL TO BS
-						buff[x] = 0x08;
-
-					if (*(((HW_TTY_CLIENT*)pParam)->console) == 0) {
-						if (buff[x] == 0x04)
-						{
-							*(((HW_TTY_CLIENT*)pParam)->debug_call) = 1;
-						}
-						else {
-							current_client->hw_uart->receive(buff[x]);
-							//current_client->baffa1_cpu.microcode.mccycle.int_request = 0x01;
-						}
-					}
-					else if (*(((HW_TTY_CLIENT*)pParam)->console) == 1) {
-						HW_TTY::net_data *net_data = (HW_TTY::net_data*)malloc(sizeof(HW_TTY::net_data));
-						current_client->tty_in->push(buff[x]);
-					}
-				}
-				x++;
-			}
-			else {
-				n = 0;
-				x = 0;
-				memset(buff, 0, 512 * (sizeof buff[0]));
-			}
-
-		}
-		else if (n == 0)
-			break;
-
+		if (!receive_bytes(current_client, receiv_buff)) break;
 	}
 
-#ifdef _MSC_VER     
+#if defined(_MSC_VER) || defined(__MINGW32__)     
 	closesocket(client);
 #else
 	shutdown(client, 2);
+	close(client);
 #endif
+	current_client->reset();
 	current_client->running = 0;
-	current_client->client = NULL;
+	current_client->client = -1;
+
+
 	return 0;
 
 }
 
 
 
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 DWORD WINAPI TelnetServerThread(LPVOID pParam)
 #else
 void *TelnetServerThread(void *pParam)
@@ -226,7 +450,7 @@ void *TelnetServerThread(void *pParam)
 	HW_TTY_CLIENT* clients = (HW_TTY_CLIENT*)pParam;
 
 	sockaddr_in local;
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 	SOCKET server;
 	WSADATA wsaData;
 	int wsaret = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -240,7 +464,7 @@ void *TelnetServerThread(void *pParam)
 	local.sin_family = AF_INET;
 	local.sin_addr.s_addr = INADDR_ANY;
 	local.sin_port = htons((u_short)SERVER_PORT);
-#ifdef _MSC_VER   
+#if defined(_MSC_VER) || defined(__MINGW32__)   
 	server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (server == INVALID_SOCKET)
 	{
@@ -256,13 +480,13 @@ void *TelnetServerThread(void *pParam)
 	{
 		return 0;
 	}
-	if (listen(server, 10) != 0)
+	if (listen(server, pool_size) != 0)
 	{
 		return 0;
 	}
 
 	sockaddr_in from;
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 	SOCKET client;
 	int fromlen = sizeof(from);
 #else
@@ -275,7 +499,7 @@ void *TelnetServerThread(void *pParam)
 		client = accept(server,
 			(struct sockaddr*)&from, &fromlen);
 
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 		u_long mode = 1;  // 1 to enable non-blocking socket
 		ioctlsocket(client, FIONBIO, &mode);
 #else
@@ -284,11 +508,11 @@ void *TelnetServerThread(void *pParam)
 
 		HW_TTY_CLIENT *new_client = NULL;
 		int i = 0;
-		for (i = 0; i < 10; i++) {
+		for (i = 0; i < pool_size; i++) {
 			if (clients[i].running == 0) {
-
-				clients[i].client = &client;
+				clients[i].reset();
 				clients[i].running = 1;
+				clients[i].client = client;
 				new_client = &clients[i];
 				break;
 			}
@@ -296,7 +520,7 @@ void *TelnetServerThread(void *pParam)
 		if (new_client != NULL) {
 
 
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 			DWORD tid = 100 + new_client->index;
 			HANDLE myHandle = CreateThread(0, 0, TelnetClientThread, new_client, 0, &tid);
 #else
@@ -310,32 +534,33 @@ void *TelnetServerThread(void *pParam)
 
 			char *buf_send = (char *)"No pool available.\n";
 			send(client, buf_send, (int)strlen(buf_send), 0);
-#ifdef _MSC_VER     
+#if defined(_MSC_VER) || defined(__MINGW32__)     
 			closesocket(client);
 #else
 			shutdown(client, 2);
+			close(client);
 #endif
 
 		}
 	}
 
 	return 0;
-}
+	}
 
 
 
-void HW_TTY::start_server(struct hw_uart* hw_uart) {
+void HW_TTY::start_server(hw_uart* hw_uart) {
 
 
 	int i;
 	//this->tty_in = queue_create();
 
-	for (i = 0; i < 10; i++) {
-		this->clients[i].client = NULL;
+	for (i = 0; i < pool_size; i++) {
+		this->clients[i].reset();
 		this->clients[i].index = i;
-		this->clients[i].running = 0;
+
 		//this->clients[i].baffa1_cpu = baffa1_cpu;
-		this->clients[i].hw_uart = hw_uart;
+		this->clients[i]._hw_uart = hw_uart;
 		//this->clients[i].tty_out = queue_create();
 		//this->clients[i].mtx = &this->mtx;
 		this->clients[i].tty_in = &this->tty_in;//queue_create();
@@ -343,7 +568,7 @@ void HW_TTY::start_server(struct hw_uart* hw_uart) {
 		this->clients[i].debug_call = &this->debug_call;
 	}
 
-#ifdef _MSC_VER        
+#if defined(_MSC_VER) || defined(__MINGW32__)        
 	DWORD tid;
 	HANDLE myHandle = CreateThread(0, 0, TelnetServerThread, &this->clients, 0, &tid);
 #else
@@ -354,171 +579,3 @@ void HW_TTY::start_server(struct hw_uart* hw_uart) {
 	this->started = 1;
 }
 
-
-
-void HW_TTY::send(BAFFA1_BYTE b) {
-
-	if (this->started == 1) {
-		int i;
-		for (i = 0; i < 10; i++) {
-			if (this->clients[i].running == 1) {  // SEND TELNET
-				BAFFA1_BYTE data = b;
-#ifdef _MSC_VER    
-				std::unique_lock<std::mutex> lock(this->clients[i].mtx_out);
-#else
-				pthread_mutex_lock(&this->clients[i].mtx_out);
-#endif
-				this->clients[i].tty_out.push(data);
-
-#ifdef _MSC_VER    
-				this->clients[i].cv_out.notify_all();
-#else
-				pthread_mutex_unlock(&this->clients[i].mtx_out);
-#endif
-			}
-		}
-	}
-}
-
-void HW_TTY::print(const char* s) {
-
-	if (this->started == 1) {
-		int i = 0;
-		while (s[i] != '\0') {
-			if (s[i] == '\n') {
-				send('\r');
-				send(s[i]);
-			}
-			else
-				send(s[i]);
-			i++;
-		}
-	}
-	printf("%s", s);
-}
-
-
-
-
-
-void HW_TTY::set_input(BAFFA1_BYTE b) {
-
-	/*
-	if (this->started == 1) {
-		int i;
-		for (i = 0; i < 10; i++) {
-			if (clients[i].running == 1) {  // SEND TELNET
-				clients[i].console = b;
-			}
-		}
-	}
-	*/
-	this->console = b;
-}
-
-char* HW_TTY::gets(int max_value) {
-
-	char str_out[255];
-	char *input = (char*)malloc(sizeof(char) * 257);
-
-	int i = 0;
-	for (i = 0; i < 256 && i < max_value; ) {
-		char cur_input = get_char();
-		if (cur_input == (char)8) {
-			if (i > 0) {
-				sprintf(str_out, "%c", cur_input);
-				sprintf(str_out, " ");
-				sprintf(str_out, "%c", cur_input);
-				print(str_out);
-				i--;
-			}
-		}
-		else if (cur_input != '\n' && cur_input != '\r') {
-			cur_input = toupper(cur_input);
-			sprintf(str_out, "%c", cur_input);
-			print(str_out);
-			input[i] = cur_input;
-			i++;
-		}
-		else {
-			print("\r\n");
-			break;
-		}
-	}
-	input[i] = '\0';
-
-	return input;
-}
-
-char* HW_TTY::getline() {
-	char str_out[255];
-	char *input = (char*)malloc(sizeof(char) * 257);
-
-	int i = 0;
-	for (i = 0; i < 256; ) {
-		char cur_input = get_char();
-		if (cur_input == (char)8) {
-			if (i > 0) {
-				sprintf(str_out, "%c", cur_input);
-				sprintf(str_out, " ");
-				sprintf(str_out, "%c", cur_input);
-				print(str_out);
-				i--;
-			}
-		}
-		else if (cur_input != '\n' && cur_input != '\r') {
-			cur_input = toupper(cur_input);
-			sprintf(str_out, "%c", cur_input);
-			print(str_out);
-			input[i] = cur_input;
-			i++;
-		}
-		else {
-			print("\r\n");
-			break;
-		}
-	}
-	input[i] = '\0';
-
-	return input;
-}
-
-
-BAFFA1_BYTE HW_TTY::receive() {
-
-	BAFFA1_BYTE ch = 0x00;
-	set_input(1);
-	while (1) {
-		if (kbhit()) {
-			ch = getch();
-			break;
-		}
-		else if (!this->tty_in.empty()) {
-
-			BAFFA1_BYTE data = this->tty_in.front(); this->tty_in.pop();
-			ch = data;
-			break;
-		}
-
-#ifdef _MSC_VER     
-		Sleep(10);
-#else
-		int milliseconds = 10;
-		struct timespec ts;
-		ts.tv_sec = milliseconds / 1000;
-		ts.tv_nsec = (milliseconds % 1000) * 1000000;
-		nanosleep(&ts, NULL);
-
-#endif
-	}
-	set_input(0);
-
-	return ch;
-}
-
-
-char HW_TTY::get_char() {
-
-	char cur_input = receive();
-	return cur_input;
-}

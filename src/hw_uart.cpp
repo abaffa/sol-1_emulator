@@ -57,14 +57,14 @@ int hw_uart::read() {
 #ifdef _MSC_VER    
 		std::unique_lock<std::mutex> lock(this->mtx_out);
 #else
-		pthread_mutex_lock(&this->mtx_out);
+		//pthread_mutex_lock(&this->mtx_out);
 #endif
 		this->data[0] = this->uart_out.front();  this->uart_out.pop();
 
 #ifdef _MSC_VER    
 		this->cv_out.notify_all();
 #else
-		pthread_mutex_unlock(&this->mtx_out);
+		//pthread_mutex_unlock(&this->mtx_out);
 #endif
 
 
@@ -97,7 +97,7 @@ void hw_uart::receive(BAFFA1_BYTE data) {
 #ifdef _MSC_VER    
 	std::unique_lock<std::mutex> lock(this->mtx_out);
 #else
-	pthread_mutex_lock(&this->mtx_out);
+	//pthread_mutex_lock(&this->mtx_out);  //?????????
 #endif
 	this->uart_out.push(data);
 
@@ -106,7 +106,7 @@ void hw_uart::receive(BAFFA1_BYTE data) {
 #ifdef _MSC_VER    
 	this->cv_out.notify_all();
 #else
-	pthread_mutex_unlock(&this->mtx_out);
+	//pthread_mutex_unlock(&this->mtx_out);
 #endif
 
 }

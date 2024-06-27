@@ -1,5 +1,5 @@
 //
-// baffa1_alu_bus.h
+// BAFFA1_ALU_BUS.h
 //
 ////// BEGIN LICENSE NOTICE//////
 //
@@ -20,7 +20,10 @@
 
 #include "config.h"
 
-struct baffa1_alu_bus {
+class BAFFA1_ALU_BUS {
+
+public:
+
 	BAFFA1_BYTE x_bus; //alu entrada
 	BAFFA1_BYTE y_bus; //alu entrada
 
@@ -34,6 +37,10 @@ struct baffa1_alu_bus {
 	BAFFA1_BYTE alu_final_cf;
 	BAFFA1_BYTE alu_output;
 
+	BAFFA1_BYTE final_condition;
+
+	void init();
+	void reset();
 };
 
 #endif

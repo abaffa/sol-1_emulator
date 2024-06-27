@@ -37,18 +37,21 @@ class BAFFA1_COMPUTER {
 
 private:
 	void trace_menu();
+	void clock_high();
+	void clock_low();
+	void debug_cycle();
 	
 public:
 	BAFFA1_CPU cpu;
 	BAFFA1_BUS bus;
 
-	struct hw_rtc hw_rtc;
-	struct hw_uart hw_uart;
-	struct hw_ide hw_ide;
-	struct hw_timer hw_timer;
+	struct hw_rtc _hw_rtc;
+	hw_uart _hw_uart;
+	struct hw_ide _hw_ide;
+	struct hw_timer _hw_timer;
 
-	HW_TTY hw_tty;
-	HW_WEB hw_web;
+	HW_TTY _hw_tty;
+	HW_WEB _hw_web;
 
 	unordered_map<string, Tasm_Opcode> ht_opcodes;
 
@@ -73,10 +76,6 @@ public:
 	BAFFA1_BYTE buffer_rd();
 	BAFFA1_BYTE buffer_wr();
 	BAFFA1_BYTE buffer_mem_io();
-	unsigned long read_address_bus();
-
-	BAFFA1_BYTE read_memory(BAFFA1_MWORD addr);
-	void write_memory(BAFFA1_MWORD addr, BAFFA1_BYTE value);
 
 	void mem_rd(BAFFA1_BYTE peripherical_sel);
 	void mem_wr(BAFFA1_BYTE peripherical_sel);
@@ -84,11 +83,11 @@ public:
 	void clock_cycle(long *runtime_counter);
 	void RunCPU(long *runtime_counter);
 
-	int peripheral_selection();
+	int peripheral_selection(unsigned long addr, BAFFA1_BYTE buffer_mem_io);
 	void bus_update();
 	void alu_update();
-	void refresh_pagetable_mem();
-	void mdr_enable();
+	//void refresh_pagetable_mem();
+	void refresh_mdr_enable();
 };
 
 

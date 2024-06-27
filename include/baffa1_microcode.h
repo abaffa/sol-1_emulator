@@ -20,9 +20,10 @@
 
 
 #include "config.h"
+#include "baffa1_bus.h"
 #include "baffa1_registers.h"
 #include "baffa1_rom.h"
-#include "baffa1_alu.h"
+#include "baffa1_alu_board.h"
 #include "hw_tty.h"
 
 #include "baffa1_controller_bus.h"
@@ -31,68 +32,54 @@ class BAFFA1_MICROCODE {
 
 public:
 
-
-	/*
-	BAFFA1_BYTE u_zf;
-	BAFFA1_BYTE u_cf;
-	BAFFA1_BYTE u_sf;
-	BAFFA1_BYTE u_of;
-	BAFFA1_BYTE u_esc;
-	BAFFA1_REGISTER_8BIT U_FLAGS;
-	
-	BAFFA1_BYTE u_zf;
-	BAFFA1_BYTE u_cf;
-	BAFFA1_BYTE u_sf;
-	BAFFA1_BYTE u_of;
-	BAFFA1_BYTE u_escape;
-
-	BAFFA1_BYTE u_esc_in_src;
-	
-
+	// ROM01
+	BAFFA1_BYTE next;		//TYP
 	BAFFA1_BYTE u_offset;
-	BAFFA1_BYTE uzf_in_src;
-	BAFFA1_BYTE ucf_in_src;
-	BAFFA1_BYTE usf_in_src;
-	BAFFA1_BYTE uof_in_src;
-	*/
 
-	//BAFFA1_REGISTER_8BIT U_FLAGS; 
-	BAFFA1_DWORD u_adder_b;
+	//ROM 02
+	BAFFA1_BYTE u_escape_0;
+
+	//ROM03
+	BAFFA1_BYTE ir_wrt;
+
+	//ROM 11
+	BAFFA1_BYTE u_escape_1;
+
+	//ROM 12
+	BAFFA1_BYTE u_esc_in_src;
+
+	//BAFFA1_DWORD u_adder_b;
 	BAFFA1_DWORD u_ad_bus; BAFFA1_DWORD old_u_ad_bus;
 	BAFFA1_DWORD u_adder;
 	/////
 
-	baffa1_controller_bus controller_bus;
+	baffa1_controller_rom controller_bus;
 
-	BAFFA1_REGISTER_8BIT IR;
+	BAFFA1_REGISTER_8BIT IR;  // Instruction Register
 
-	BAFFA1_REGISTER_8BIT U_ADDRESSl;
-	BAFFA1_REGISTER_8BIT U_ADDRESSh;
+	BAFFA1_REGISTER_8BIT U_ADDRESSl;  // Address Register
+	BAFFA1_REGISTER_8BIT U_ADDRESSh;  // Address Register
 
 	BAFFA1_ROM rom;
-
-
-	void init(HW_TTY& hw_tty);
 	
-	BAFFA1_DWORD u_adder_refresh(BAFFA1_BYTE typ, BAFFA1_BYTE final_condition, BAFFA1_CONFIG& config, HW_TTY& hw_tty);
+	BAFFA1_BYTE mux;
 
-	BAFFA1_BYTE page_table_addr_src(BAFFA1_BYTE reg_status_value);
-	BAFFA1_BYTE int_pending(BAFFA1_BYTE reg_status_value);
-	BAFFA1_BYTE any_interruption(BAFFA1_BYTE reg_status_value);
+	void init(HW_TTY& hw_tty);	
+	void reset();
 
-	BAFFA1_BYTE MUX(BAFFA1_BYTE reg_status_value);
+	void sequencer_start(BAFFA1_BYTE any_interruption, BAFFA1_BYTE final_condition, BAFFA1_BUS& bus);
+	void sequencer_end();
 
-	
-	void sequencer_update(BAFFA1_BYTE reg_status_value, BAFFA1_CONFIG& config, HW_TTY& hw_tty);
+	void debugger(BAFFA1_CONFIG& config, HW_TTY& hw_tty);
 
+private:	
 
-private:
+	BAFFA1_BYTE calc_MUX(BAFFA1_BYTE typ, BAFFA1_BYTE any_interruption);
 
-	void display_u_adder(BAFFA1_BYTE typ, BAFFA1_BYTE final_condition, HW_TTY& hw_tty);
-
-	void addresser(BAFFA1_BYTE reg_status_value, BAFFA1_CONFIG& config, HW_TTY& hw_tty);
-
-	void load_microcode_from_rom();
+	//microcode sequence
+	BAFFA1_DWORD U_ADDER(BAFFA1_BYTE u_offset, BAFFA1_DWORD u_ad, bool type_branch); //Clock up
+	BAFFA1_DWORD microcode_addresser(BAFFA1_BYTE mux, BAFFA1_DWORD u_adder, BAFFA1_BYTE escape, BAFFA1_BYTE ir); //Clock up
+	void load_microcode_from_rom(BAFFA1_DWORD addr); //Clock down
 };
 #endif
 

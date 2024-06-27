@@ -22,7 +22,7 @@
 #include "baffa1_register_8bit.h"
 #include "baffa1_controller_bus.h"
 #include "baffa1_alu_bus.h"
-#include "HW_TTY.h"
+#include "hw_tty.h"
 
 // FLAG - msw-h - bits
 #define MSWh_ZF 0x00 // ZeroFlag
@@ -121,16 +121,16 @@ public:
 	void mswh_flags_desc(HW_TTY& hw_tty);
 	void mswl_status_desc(HW_TTY& hw_tty);
 
-	void refresh(struct baffa1_controller_bus *controller_bus, struct baffa1_alu_bus* alu_bus, BAFFA1_BYTE data_bus, BAFFA1_BYTE u_sf, BAFFA1_CONFIG& config, FILE *fa);
-	void refresh_reg_flags(struct baffa1_controller_bus *controller_bus, struct baffa1_alu_bus* alu_bus, BAFFA1_BYTE u_sf);
+	void refresh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE data_bus, BAFFA1_BYTE u_sf, BAFFA1_CONFIG& config, FILE *fa);
+	void refresh_reg_flags_MSWh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE u_sf);
 
 
 private:
 
-	BAFFA1_BYTE refresh_MSWh_ZF(struct baffa1_controller_bus *controller_bus, struct baffa1_alu_bus* alu_bus);
-	BAFFA1_BYTE refresh_MSWh_CF(struct baffa1_controller_bus *controller_bus, struct baffa1_alu_bus* alu_bus);
-	BAFFA1_BYTE refresh_MSWh_SF(struct baffa1_controller_bus *controller_bus, struct baffa1_alu_bus* alu_bus);
-	BAFFA1_BYTE refresh_MSWh_OF(struct baffa1_controller_bus *controller_bus, struct baffa1_alu_bus* alu_bus, BAFFA1_BYTE u_sf);
+	BAFFA1_BYTE get_MSWh_ZF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus);
+	BAFFA1_BYTE get_MSWh_CF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus);
+	BAFFA1_BYTE get_MSWh_SF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus);
+	BAFFA1_BYTE get_MSWh_OF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE u_sf);
 
 };
 #endif

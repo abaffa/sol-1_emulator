@@ -20,24 +20,24 @@
 
 #include "config.h"
 
-struct baffa1_controller_bus {
+struct baffa1_controller_rom {
 
 	//ROM 01
-	BAFFA1_BYTE next;		//TYP
-	BAFFA1_BYTE u_offset;
+	//BAFFA1_BYTE next;		//TYP
+	//BAFFA1_BYTE u_offset;
 
 	//ROM 02
 	BAFFA1_BYTE cond_inv;
 	BAFFA1_BYTE cond_flags_src;
 	BAFFA1_BYTE cond_sel;
-	BAFFA1_BYTE u_escape_0;
+	//BAFFA1_BYTE u_escape_0;
 
 	//ROM 03
 	BAFFA1_BYTE uzf_in_src;
 	BAFFA1_BYTE ucf_in_src;
 	BAFFA1_BYTE usf_in_src;
 	BAFFA1_BYTE uof_in_src;
-	BAFFA1_BYTE ir_wrt;
+	//BAFFA1_BYTE ir_wrt;
 	BAFFA1_BYTE status_wrt; //mswl_wrt // status (flags de controle)
 
 	//ROM 04
@@ -98,10 +98,10 @@ struct baffa1_controller_bus {
 	BAFFA1_BYTE pch_wrt;
 	BAFFA1_BYTE spl_wrt;
 	BAFFA1_BYTE sph_wrt;
-	BAFFA1_BYTE u_escape_1;
+	//BAFFA1_BYTE u_escape_1;
 
 	//ROM 12
-	BAFFA1_BYTE u_esc_in_src;
+	//BAFFA1_BYTE u_esc_in_src;
 	BAFFA1_BYTE int_vector_wrt;
 	BAFFA1_BYTE mask_flags_wrt;
 	BAFFA1_BYTE mar_in_src;
@@ -136,53 +136,54 @@ struct baffa1_controller_bus {
 
 
 
-	///////////////////////////////////////////////////////////
-	//BAFFA1_BYTE sspl_wrt;
-	//BAFFA1_BYTE ssph_wrt;
-
 	//?????????????
 	BAFFA1_BYTE memory_io; // bus_mem_io //?????????????????
-	BAFFA1_BYTE page_present; ////////?????????????????
-	BAFFA1_BYTE page_writable; ////////?????????????????
+	
+	
+	BAFFA1_BYTE page_present; //memory
+	BAFFA1_BYTE page_writable; //memory
 	//?????????????
 
 
+	//
+	 //??
+	BAFFA1_BYTE any_interruption; //memory
+	
+	BAFFA1_BYTE int_pending; //alu, memory
 
 	//
 
-	BAFFA1_BYTE int_vector;
+	BAFFA1_BYTE int_vector; // register, int
+	BAFFA1_BYTE int_status;// register, int
 
-	BAFFA1_BYTE int_status;
 
-
-	BAFFA1_BYTE int_request;
-	BAFFA1_BYTE int_req;
+	BAFFA1_BYTE int_request; //Memory	Int/Clk
+	BAFFA1_BYTE int_req; // Int/Clk
 	//
 
-	BAFFA1_BYTE dma_req; ////////?????????????????
+	BAFFA1_BYTE dma_req;  //alu, memory
+	BAFFA1_BYTE wait; //alu, memory
+	BAFFA1_BYTE ext_input; //alu, memory
 
-	BAFFA1_BYTE wait; ////////?????????????????
-	BAFFA1_BYTE ext_input; ////////?????????????????
+	
 
-	BAFFA1_BYTE final_condition;
+	BAFFA1_BYTE panel_regsel; //alu
+	BAFFA1_BYTE panel_rd;//memory
+	BAFFA1_BYTE panel_wr;//memory
+	BAFFA1_BYTE panel_mem_io; //memory
 
-	BAFFA1_BYTE panel_regsel;
-	BAFFA1_BYTE panel_rd;
-	BAFFA1_BYTE panel_wr;
-	BAFFA1_BYTE panel_mem_io;
-
+	//panel
 	long panel_address;
 	BAFFA1_BYTE panel_data;
 	BAFFA1_BYTE panel_req;
-
 	BAFFA1_BYTE panel_run = 0;
 	BAFFA1_BYTE panel_step = 0;
 	BAFFA1_BYTE panel_microcodestep = 0;
 
-	BAFFA1_BYTE clk = 0;
+	BAFFA1_BYTE clk = 1; 
 
 
-	BAFFA1_BYTE reset = 0;
+	BAFFA1_BYTE reset = 0; //controller, alu, memory
 	BAFFA1_BYTE restart = 0;
 };
 

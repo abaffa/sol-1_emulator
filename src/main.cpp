@@ -19,9 +19,147 @@
 #include <stdlib.h>
 #include "baffa1_computer.h"
 
-#ifdef __MINGW32__
+//#define __debug__
+
+#if defined(__debug__) 
+#include "hw_tty.h"
+#include "config.h"
+#include "baffa1_alu_4bit.h"
+#include "baffa1_alu_board.h"
+
+int main(int argc, char** argv) {
+
+	/*
+	baffa1_alu_4bit alu;
+
+	BAFFA1_BYTE A = 1;
+	BAFFA1_BYTE B = 0;
+	BAFFA1_BYTE CIN = 0;
+	BAFFA1_BYTE S = 0;
+	BAFFA1_BYTE M = 1;
+
+	printf("   S  M  A  B        F EQ CO  G  P\n");
+	for (int i = 0; i <= 0b1111; i++) {
+		S = i;
+		baffa1_alu_4bit_op(&alu, A, B, CIN, S, M);
+			printf("%c%c%c%c %02x %02x %02x %c%c%c%c%c%c%c%c %02x %02x %02x %02x\n", NIBBLE_TO_BINARY(S), M, A, B, BYTE_TO_BINARY(alu.F), alu.EQ, alu.COUT, alu.G, alu.P);
+	}
+	*/
+
+		
+		BAFFA1_ALU alu;
+		BAFFA1_REGISTERS registers;
+		BAFFA1_MICROCODE microcode;
+		BAFFA1_BUS bus;
+		BAFFA1_CONFIG config;
+		HW_TTY _hw_tty;
+
+		config.DEBUG_ALU = true;
+		config.DEBUG_UFLAGS = true;
+
+		bus.init();
+		alu.baffa1_alu_init();
+		microcode.init(_hw_tty);
 
 
+
+			microcode.controller_bus.alu_cf_in_src = 0;
+			//alu_cf_in_src	0	0b0		vcc		alu_cf_in_inv = 0
+			//alu_cf_in_src	1	0b1		cf		alu_cf_in_inv = 0
+			//alu_cf_in_src	2	0b10	u_cf	alu_cf_in_inv = 0
+			//alu_cf_in_src	3	0b11	*unused	alu_cf_in_inv = 0
+			//alu_cf_in_src	0	0b0		gnd		alu_cf_in_inv = 1
+			//alu_cf_in_src	1	0b1		~cf		alu_cf_in_inv = 1
+			//alu_cf_in_src	2	0b10	~u_cf	alu_cf_in_inv = 1
+
+			microcode.controller_bus.alu_cf_in_inv = 1;
+			//alu_cf_in_inv	0	0	Carry - in not inverted
+			//alu_cf_in_inv	1	1	Carry - in inverted
+
+			microcode.controller_bus.alu_cf_out_inv = 1;
+			//alu_cf_out_inv	0	0	Carry - out not inverted
+			//alu_cf_out_inv	1	1	Carry - out inverted
+
+
+			microcode.controller_bus.alu_mode = 0; //Mode
+			//alu_mode	0	0	ALU Operation   (Arithmetic Operations) - check Cin
+			//alu_mode	1	1	ALU Operation	(Logic Functions)
+
+			microcode.controller_bus.alu_op = 0b1001; //Selection
+			//alu_op	0	0	ALU Operation	alu_mode = (~Cn=1  A  | ~Cn=0  A + 1)
+			//alu_op	0	0	* **unused	alu_mode = 0
+			//alu_op	9	1001	plus	alu_mode = 0  (~Cn=1  A + B | ~Cn=0  A + B + 1)
+			//alu_op	6	110		minus	alu_mode = 0  (~Cn=1  A - B - 1 | ~Cn=0  A - B)
+			//alu_op	11	1011	and		alu_mode = 1
+			//alu_op	14	1110	or		alu_mode = 1
+			//alu_op	6	110		xor		alu_mode = 1
+			//alu_op	15	1111	A		alu_mode = 1
+			//alu_op	10	1010	B		alu_mode = 1
+			//alu_op	0	0		not A	alu_mode = 1
+			//alu_op	5	101		not B	alu_mode = 1
+			//alu_op	4	100		nand	alu_mode = 1 
+			//alu_op	1	1		nor		alu_mode = 1
+			//alu_op	9	1001	nxor	alu_mode = 1
+
+
+			microcode.controller_bus.shift_src = 0;
+			//shift_src	0	0	gnd
+			//shift_src	1	1	uCF
+			//shift_src	2	10	CF
+			//shift_src	3	11	ALU Result[0]
+			//shift_src	4	100	ALU Result[7]
+
+
+			//flags
+			//uof_in_src	0	0 * **unchanged
+			//uof_in_src	1	1	ALU_OF
+			//usf_in_src	0	0 * **unchanged
+			//usf_in_src	1	1	Z_BUS_7
+			//ucf_in_src	0	0 * **unchanged
+			//ucf_in_src	1	1	ALU Final CF
+			//ucf_in_src	2	10	ALU_OUTPUT_0
+			//ucf_in_src	3	11	ALU_OUTPUT_7
+			//uzf_in_src	0	0 * **unchanged
+			//uzf_in_src	1	1	ALU_ZF
+			//uzf_in_src	2	10	ALU_ZF && uZF
+			//uzf_in_src	3	11	gnd
+
+		bus.alu_bus.x_bus = 0b11;
+		bus.alu_bus.y_bus = 0b11;
+
+		//microcode.controller_bus.alu_mode = 0
+		//microcode.controller_bus.alu_op = 0b1001; //plus
+		//microcode.controller_bus.alu_op = 0b110; //minus
+
+		microcode.controller_bus.alu_mode = 0;
+		microcode.controller_bus.alu_op = 0b0; // A
+		//microcode.controller_bus.alu_op = 0b1001; //nxor - equal
+		microcode.controller_bus.alu_cf_in_inv = 0;
+
+		microcode.controller_bus.zbus_out_src = 2;
+		//zbus_out_src	0	0	Normal ALU Result
+		//zbus_out_src	1	1	Shifted Right
+		//zbus_out_src	2	10	Shifted Left
+		//zbus_out_src	3	11	Sign Extend
+
+
+
+		alu.ALU_EXEC(&microcode.controller_bus, bus.alu_bus, alu.u_cf, get_byte_bit(registers.MSWh.value(), MSWh_CF), config, _hw_tty);
+		alu.u_flags_refresh(&microcode.controller_bus, registers.MSWl.value(), registers.MSWh.value(), bus.alu_bus, config, _hw_tty);
+
+		char str_out[255];
+		/*
+		for(int i = 0;i <=0b1111;i++){
+			microcode.controller_bus.alu_op = i;
+			sprintf(str_out, "M:%02x", microcode.controller_bus.alu_op); _hw_tty.print(str_out);
+			_hw_tty.print("\n");
+
+			alu.ALU_EXEC(&microcode.controller_bus, bus.alu_bus, alu.u_cf, get_byte_bit(registers.MSWh.value(), MSWh_CF), config, _hw_tty);
+		}
+		*/
+}
+
+#elif defined(__linux__) || defined(__MINGW32__)
 
 int main(int argc, char** argv) {
 
@@ -36,6 +174,8 @@ int main(int argc, char** argv) {
 
 	}
 
+	return 0;
+}
 #elif _MSC_VER        
 
 #include <windows.h>
@@ -152,7 +292,7 @@ static void button_process_event(button_t *btn, const SDL_Event *ev) {
 	}
 }
 
-#include "baffa1_alu_bus.h"
+#include "BAFFA1_ALU_BUS.h"
 #include "baffa1_controller_bus.h"
 int main(int argc, char** argv) {
 
@@ -200,7 +340,7 @@ int main(int argc, char** argv) {
 		DWORD tid;
 		HANDLE myHandle = CreateThread(0, 0, run_thread, (void *)&baffa1_computer, 0, &tid);
 #endif
-	
+
 
 		while (1) {
 
@@ -386,7 +526,7 @@ int main(int argc, char** argv) {
 
 
 
-			long  address_bus = baffa1_computer.read_address_bus();
+			long  address_bus = baffa1_computer.cpu.memory.read_address_bus(baffa1_computer.bus.bus_tristate(baffa1_computer.cpu.registers), baffa1_computer.cpu.microcode, baffa1_computer.cpu.registers);
 			BAFFA1_BYTE data_bus = baffa1_computer.bus.data_bus;
 			BAFFA1_BYTE ir = baffa1_computer.cpu.microcode.IR.value();
 			BAFFA1_BYTE w = baffa1_computer.bus.w_bus;
@@ -461,7 +601,7 @@ int main(int argc, char** argv) {
 			}
 			*/
 
-			
+
 			draw_circle(renderer, 70 + (30 * 0), 250, 10, getColor(status, 1));
 			draw_circle(renderer, 70 + (30 * 1), 250, 10, getColor(status, 2));
 			draw_circle(renderer, 70 + (30 * 2), 250, 10, getColor(status, 3));
@@ -474,7 +614,7 @@ int main(int argc, char** argv) {
 			draw_circle(renderer, 70 + (30 * 7), 200, 10, getInvColor(baffa1_computer.cpu.microcode.controller_bus.page_writable, 0));
 			draw_circle(renderer, 70 + (30 * 7), 250, 10, getInvColor(baffa1_computer.cpu.microcode.controller_bus.page_present, 0));
 
-			
+
 			draw_circle(renderer, 70 + (30 * 8), 200, 10, getColor(baffa1_computer.cpu.microcode.controller_bus.dma_req, 0));
 			draw_circle(renderer, 70 + (30 * 8), 250, 10, getColor(status, 0));
 
@@ -529,8 +669,6 @@ int main(int argc, char** argv) {
 				//printf("\ndma req\n");
 				baffa1_computer.cpu.microcode.controller_bus.dma_req = get_byte_bit((~baffa1_computer.cpu.microcode.controller_bus.dma_req), 0);
 			}
-
-
 
 
 			for (i = 7; i >= 0; i--)

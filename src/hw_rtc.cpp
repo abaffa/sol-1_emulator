@@ -41,7 +41,7 @@ BAFFA1_DWORD hw_rtc_current_datetime() {
 
 	time(&timer);  /* get current time; same as: timer = time(NULL)  */
 
-	seconds = difftime(timer, mktime(&y2k));
+	seconds = (BAFFA1_DWORD)difftime(timer, mktime(&y2k));
 
 	return seconds;
 }
@@ -60,13 +60,21 @@ void hw_rtc_init(struct hw_rtc* hw_rtc) {
 
 BAFFA1_BYTE convertToHex(int v) {
 	char buffer[16];
-	BAFFA1_BYTE ret = strtol(itoa(v, buffer, 10), NULL, 16);
+#if defined(_MSC_VER) || defined(__MINGW32__)     
+	BAFFA1_BYTE ret = (BAFFA1_BYTE)strtol(_itoa(v, buffer, 10), NULL, 16);
+#else
+	BAFFA1_BYTE ret = (BAFFA1_BYTE)strtol(itoa(v, buffer, 10), NULL, 16);
+#endif
 	return ret;
 }
 
 BAFFA1_BYTE convertToInt(int v) {
 	char buffer[16];
-	BAFFA1_BYTE ret = strtol(itoa(v, buffer, 16), NULL, 10);
+#if defined(_MSC_VER) || defined(__MINGW32__)     
+	BAFFA1_BYTE ret = (BAFFA1_BYTE)strtol(_itoa(v, buffer, 16), NULL, 10);
+#else
+	BAFFA1_BYTE ret = (BAFFA1_BYTE)strtol(itoa(v, buffer, 16), NULL, 10);
+#endif
 	return ret;
 }
 

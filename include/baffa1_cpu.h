@@ -19,10 +19,10 @@
 #define BAFFA1CPU_H
 
 #include "config.h"
-#include "baffa1_memory.h"
+#include "baffa1_memory_board.h"
 #include "baffa1_microcode.h"
 #include "baffa1_registers.h"
-#include "baffa1_alu.h"
+#include "baffa1_alu_board.h"
 #include "hw_tty.h"
 #include <stddef.h>
 
@@ -57,9 +57,9 @@ public:
 	void display_registers_lite(HW_TTY& hw_tty);
 
 
-	BAFFA1_BYTE *get_current_memory();
+	Memory get_current_memory();
 
-	int get_current_memory_size();
+	unsigned int get_current_memory_size();
 
 
 
