@@ -21,33 +21,19 @@
 #include "config.h"
 #include "baffa1_register_8bit.h"
 #include "baffa1_controller_bus.h"
+#include "baffa1_alu_board.h"
 #include "baffa1_alu_bus.h"
+#include "baffa1_registers_bus.h"
 #include "hw_tty.h"
-
-// FLAG - msw-h - bits
-#define MSWh_ZF 0x00 // ZeroFlag
-#define MSWh_CF 0x01 // Carry Flag
-#define MSWh_SF 0x02 // Overflow Flag
-#define MSWh_OF 0x03 // Sign Flag
-#define MSWh_12 0x04
-#define MSWh_13 0x05
-#define MSWh_14 0x06
-#define MSWh_15 0x07
-
-// STATUS FLAGS - msw-l bits
-#define MSWl_DMA_ACK 0x00
-#define MSWl_INTERRUPT_ENABLE 0x01
-#define MSWl_CPU_MODE 0x02
-#define MSWl_PAGING_EN 0x03
-#define MSWl_HALT 0x04
-#define MSWl_DISPLAY_REG_LOAD 0x05
-#define MSWl_14 0x06
-#define MSWl_DIR 0x07
 
 class BAFFA1_REGISTERS
 {
 
 public:
+
+	BAFFA1_REGISTERS_BUS registers_bus;
+
+
 	//General Purpose Registers
 	//DATA REGISTERS
 	BAFFA1_REGISTER_8BIT Ah; // AX (16bit) Accumulator	(Ah/Al)
@@ -58,8 +44,7 @@ public:
 	BAFFA1_REGISTER_8BIT Cl;
 	BAFFA1_REGISTER_8BIT Dh; // DX (16bit) Data		(Dh/Dl)
 	BAFFA1_REGISTER_8BIT Dl;
-	BAFFA1_REGISTER_8BIT Gh; // GX (16bit)	Gh/Gl	General Register(For scratch)
-	BAFFA1_REGISTER_8BIT Gl;
+
 
 	//Pointer Registers
 	BAFFA1_REGISTER_8BIT BPh; // BP (16bit) Base Pointer  (Used to manage stack frames)
@@ -82,9 +67,6 @@ public:
 	BAFFA1_REGISTER_8BIT PTB;  // PTB (8bit) = Page table base
 
 
-
-	BAFFA1_REGISTER_8BIT MSWh; // MSW (16bit) FLAGS
-	BAFFA1_REGISTER_8BIT MSWl; // STATUS - flags de controle
 
 
 	BAFFA1_REGISTER_8BIT INT_MASKS; // INT FLAGS
@@ -117,20 +99,18 @@ public:
 	static BAFFA1_DWORD value(BAFFA1_REGISTER_8BIT& l, BAFFA1_REGISTER_8BIT& h);
 	static void set(BAFFA1_REGISTER_8BIT& l, BAFFA1_REGISTER_8BIT& h, BAFFA1_DWORD v);
 	static void reset(BAFFA1_REGISTER_8BIT& l, BAFFA1_REGISTER_8BIT& h);
-	
-	void mswh_flags_desc(HW_TTY& hw_tty);
-	void mswl_status_desc(HW_TTY& hw_tty);
 
-	void refresh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE data_bus, BAFFA1_BYTE u_sf, BAFFA1_CONFIG& config, FILE *fa);
-	void refresh_reg_flags_MSWh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE u_sf);
+	void refresh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU& alu, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE data_bus, BAFFA1_BYTE u_sf, BAFFA1_CONFIG& config, FILE *fa);
+
+	BAFFA1_BYTE k_bus_refresh(BAFFA1_BYTE alu_b_src);
+
+	BAFFA1_BYTE w_bus_refresh(BAFFA1_BYTE bus_tristate, BAFFA1_BYTE panel_regsel, BAFFA1_BYTE alu_a_src, BAFFA1_BYTE display_reg_load,
+		BAFFA1_BYTE int_vector, BAFFA1_BYTE
+		, BAFFA1_BYTE int_status, FILE *fa, BAFFA1_BYTE DEBUG_RDREG, HW_TTY& hw_tty);
 
 
-private:
 
-	BAFFA1_BYTE get_MSWh_ZF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus);
-	BAFFA1_BYTE get_MSWh_CF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus);
-	BAFFA1_BYTE get_MSWh_SF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus);
-	BAFFA1_BYTE get_MSWh_OF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE u_sf);
+//private:
 
 };
 #endif

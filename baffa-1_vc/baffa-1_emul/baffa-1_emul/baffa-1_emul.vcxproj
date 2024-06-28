@@ -46,6 +46,7 @@
     <ClCompile Include="..\..\..\src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\baffa1_registers_bus.h" />
     <ClInclude Include="..\..\..\include\config.h" />
     <ClInclude Include="..\..\..\include\console_local.h" />
     <ClInclude Include="..\..\..\include\debugmenu_main.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="..\..\..\include\utils.h" />
     <ClInclude Include="..\..\..\include\baffa1_memory_board.h" />
     <ClInclude Include="..\..\..\include\baffa1_registers.h" />
+    <ClInclude Include="..\..\..\src\baffa1_registers_bus.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="..\..\..\roms\rom">

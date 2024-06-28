@@ -52,6 +52,12 @@
     <Filter Include="Source Files\microcode">
       <UniqueIdentifier>{27e9946e-956f-4407-8e1e-d1f2ead44308}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\registers">
+      <UniqueIdentifier>{b79ad801-9b3a-4423-b381-f791f3571363}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\registers">
+      <UniqueIdentifier>{a34481b4-2151-41ee-b7af-9ca2ed55cc6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
@@ -90,16 +96,10 @@
     <ClCompile Include="..\..\..\src\linkedlist.cpp">
       <Filter>Source Files\libs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\baffa1_alu_board.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\baffa1_alu_4bit.cpp">
       <Filter>Source Files\alu</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\baffa1_bus.cpp">
-      <Filter>Source Files\bus</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\baffa1_alu_bus.cpp">
       <Filter>Source Files\bus</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\hw_web.cpp">
@@ -128,6 +128,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\baffa1_microcode.cpp">
       <Filter>Source Files\microcode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\baffa1_alu_board.cpp">
+      <Filter>Source Files\alu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\baffa1_alu_bus.cpp">
+      <Filter>Source Files\alu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -401,16 +407,10 @@
     <ClInclude Include="..\..\..\include\SDL2\begin_code.h">
       <Filter>Header Files\SDL2</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\baffa1_alu_board.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\baffa1_alu_4bit.h">
       <Filter>Header Files\alu</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\baffa1_bus.h">
-      <Filter>Header Files\bus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\baffa1_alu_bus.h">
       <Filter>Header Files\bus</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\hw_ide.h">
@@ -445,6 +445,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\baffa1_microcode.h">
       <Filter>Header Files\microcode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\baffa1_alu_board.h">
+      <Filter>Header Files\alu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\baffa1_alu_bus.h">
+      <Filter>Header Files\alu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\baffa1_registers_bus.h">
+      <Filter>Header Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\baffa1_registers_bus.cpp">
+      <Filter>Source Files\registers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -62,12 +62,12 @@ public:
 
 	int load_bios();
 
-	unsigned long read_address_bus(BAFFA1_BYTE bus_tristate, BAFFA1_MICROCODE& microcode, BAFFA1_REGISTERS& registers);
+	unsigned long read_address_bus(BAFFA1_BYTE bus_tristate, BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers);
 	BAFFA1_BYTE read_memory(BAFFA1_MWORD addr, BAFFA1_BYTE buffer_mem_io, BAFFA1_BYTE buffer_rd);
 	void write_memory(BAFFA1_MWORD addr, BAFFA1_BYTE value, BAFFA1_BYTE buffer_mem_io, BAFFA1_BYTE buffer_wr);
-	void refresh_pagetable_mem(BAFFA1_MICROCODE& microcode, BAFFA1_REGISTERS& registers);
+	void refresh_pagetable_mem(BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers);
 
-	void refresh_int_pending(BAFFA1_MICROCODE& microcode, BAFFA1_REGISTERS& registers);
+	void refresh_int_pending(BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers);
 	void refresh_any_interruption(BAFFA1_MICROCODE& microcode);
 
 	void displayMainMemory(BAFFA1_REGISTERS& registers, HW_TTY& hw_tty);

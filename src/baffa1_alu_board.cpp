@@ -20,6 +20,8 @@
 #include "utils.h"
 
 void BAFFA1_ALU::baffa1_alu_reset() {
+	
+	alu_bus.reset();
 
 	//this->_A = 0x00;
 	//this->_B = 0x00;
@@ -41,6 +43,7 @@ void BAFFA1_ALU::baffa1_alu_reset() {
 
 void BAFFA1_ALU::baffa1_alu_init() {
 
+	this->alu_bus.init(); 
 
 	this->baffa1_alu_reset();
 
@@ -52,8 +55,71 @@ void BAFFA1_ALU::baffa1_alu_init() {
 	this->U_FLAGS.reset();
 }
 
-BAFFA1_BYTE BAFFA1_ALU::ALU_EXEC(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS &alu_bus,
-	BAFFA1_BYTE u_cf, BAFFA1_BYTE msw_cf, BAFFA1_CONFIG& config, HW_TTY& hw_tty) {
+
+
+BAFFA1_BYTE ALU(
+	BAFFA1_BYTE XBus, BAFFA1_BYTE YBus,
+	BAFFA1_BYTE alu_op, BAFFA1_BYTE alu_mode,
+	BAFFA1_BYTE alu_cf_in_src, BAFFA1_BYTE msw_cf, BAFFA1_BYTE u_cf, BAFFA1_BYTE alu_cf_in_inv) {
+	////////////////////////////////////////////////////////////////
+	//
+	// Set C_in
+	//
+	BAFFA1_BYTE alu_cin = 0x00;
+
+	if ((alu_cf_in_src & 0b00000011) == 0x00)
+		alu_cin = 1;
+	else {
+		if ((alu_cf_in_src & 0b00000011) == 0x01)
+			alu_cin = msw_cf;
+
+		else if ((alu_cf_in_src & 0b00000011) == 0x02)
+			alu_cin = u_cf;
+
+		else if ((alu_cf_in_src & 0b00000011) == 0x03)
+			alu_cin = 0;
+	}
+
+	alu_cin = (alu_cin ^ alu_cf_in_inv) & 0b00000001;
+
+	////////////////////////////////////////////////////////////////
+	//
+	// Calculate ALU
+	//
+	//this->A = XBus;
+	//this->B = YBus;
+	//this->CIN = (alu_cin) & 0b00000001;
+
+	BAFFA1_BYTE ALU_S = alu_op;
+	BAFFA1_BYTE ALU_M = alu_mode;
+
+	baffa1_alu_4bit ALUl;
+	BAFFA1_BYTE ALUl_A = XBus & 0b00001111;
+	BAFFA1_BYTE ALUl_B = YBus & 0b00001111;
+	BAFFA1_BYTE ALUl_CIN = (alu_cin) & 0b00000001;
+	baffa1_alu_4bit_op(&ALUl, ALUl_A, ALUl_B, ALUl_CIN, ALU_S, ALU_M);
+
+	baffa1_alu_4bit ALUh;
+	BAFFA1_BYTE ALUh_A = (XBus & 0b11110000) >> 4;
+	BAFFA1_BYTE ALUh_B = (YBus & 0b11110000) >> 4;
+	BAFFA1_BYTE ALUh_CIN = (ALUl.COUT) & 0b00000001;
+	baffa1_alu_4bit_op(&ALUh, ALUh_A, ALUh_B, ALUh_CIN, ALU_S, ALU_M);
+
+
+	BAFFA1_BYTE ALUh_C = (ALUl.F & 0b00001111) | ((ALUh.F & 0b00001111) << 4);
+	//this->C = ALUh_C;
+	//this->COUT = ALUh.COUT;
+
+	//alu_bus.alu_output = this->C;
+
+	return ALUh_C;
+}
+
+BAFFA1_BYTE BAFFA1_ALU::ALU_EXEC(struct baffa1_controller_rom *controller_bus, BAFFA1_BYTE w_bus, BAFFA1_BYTE k_bus,
+	BAFFA1_BYTE u_cf, BAFFA1_BYTE msw_cf, BAFFA1_CONFIG& config, HW_TTY& hw_tty, FILE *fa) {
+
+	alu_bus.x_bus = x_bus_refresh(w_bus, controller_bus->alu_a_src);
+	alu_bus.y_bus = y_bus_refresh(k_bus, controller_bus->imm, controller_bus->alu_b_src);
 
 	////////////////////////////////////////////////////////////////
 	//
@@ -99,15 +165,22 @@ BAFFA1_BYTE BAFFA1_ALU::ALU_EXEC(struct baffa1_controller_rom *controller_bus, B
 	BAFFA1_BYTE ALUh_CIN = (ALUl.COUT) & 0b00000001;
 	baffa1_alu_4bit_op(&ALUh, ALUh_A, ALUh_B, ALUh_CIN, ALU_S, ALU_M);
 
-	this->C = (ALUl.F & 0b00001111) | ((ALUh.F & 0b00001111) << 4); 
+	this->C = (ALUl.F & 0b00001111) | ((ALUh.F & 0b00001111) << 4);
 	this->COUT = ALUh.COUT;
 
 	alu_bus.alu_output = this->C;
 
-	/////////////////////////////////////////////////////////////////
-	//
-	// ALU_CF (Carry Flag)
-	//
+	// Corrigir aqui 
+	/*
+	alu_bus.alu_output = ALU(
+		alu_bus.x_bus, alu_bus.y_bus,
+		controller_bus->alu_op, controller_bus->alu_mode,
+		controller_bus->alu_cf_in_src, msw_cf, u_cf, controller_bus->alu_cf_in_inv);
+		*/
+		/////////////////////////////////////////////////////////////////
+		//
+		// ALU_CF (Carry Flag)
+		//
 
 	alu_bus.alu_cf = this->COUT;
 	alu_bus.alu_final_cf = (alu_bus.alu_cf ^ (controller_bus->alu_cf_out_inv)) & 0b00000001;
@@ -154,7 +227,7 @@ BAFFA1_BYTE BAFFA1_ALU::ALU_EXEC(struct baffa1_controller_rom *controller_bus, B
 
 	else if ((controller_bus->zbus_out_src & 0b00000011) == 0x03)
 		alu_bus.z_bus = get_byte_bit(alu_bus.alu_output, 7) != 0x00 ? 0b11111111 : 0b00000000;
-	
+
 
 	/////////////////////////////////////////////////////////////////
 	//
@@ -171,6 +244,31 @@ BAFFA1_BYTE BAFFA1_ALU::ALU_EXEC(struct baffa1_controller_rom *controller_bus, B
 	//
 	alu_bus.alu_zf = (alu_bus.z_bus == 0x00);
 	/////////////////////////////////////////////////////////////////
+
+
+
+	//Flags
+	// nao posso usar final condition sem ter atualizado o MSW
+	refresh_reg_flags_MSWh(controller_bus, alu_bus, u_sf);
+
+	//Status
+	if (controller_bus->status_wrt == 0x00) {
+		this->MSWl.set(alu_bus.z_bus);
+	}
+
+	// G
+	if (controller_bus->gh_wrt == 0x00) { this->Gh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"Gh", alu_bus.z_bus); } }
+	if (controller_bus->gl_wrt == 0x00) { this->Gl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"Gl", alu_bus.z_bus); } }
+
+
+	// U_FLAGS
+	// nao posso usar final condition sem ter atualizado o MSW
+	u_flags_refresh(controller_bus, MSWl.value(), MSWh.value(), alu_bus, config, hw_tty);
+
+
+	//final condition
+	// nao posso usar final condition sem ter atualizado o MSW
+	alu_bus.final_condition = this->calc_final_condition(controller_bus, MSWl.value(), MSWh.value());
 
 	if (config.DEBUG_ALU) {
 		display_debug_alu(controller_bus, alu_bus, u_cf, msw_cf, hw_tty);
@@ -224,7 +322,7 @@ void BAFFA1_ALU::u_flags_refresh(struct baffa1_controller_rom *controller_bus, B
 	if (controller_bus->usf_in_src == 0x00)// unchanged
 		inSF = get_byte_bit(this->u_sf, 0);
 	else
-		inSF = get_byte_bit(alu_bus.z_bus, 7); 
+		inSF = get_byte_bit(alu_bus.z_bus, 7);
 
 	if (controller_bus->uof_in_src == 0x00)
 		inOF = get_byte_bit(this->u_of, 0);// unchanged
@@ -242,8 +340,7 @@ void BAFFA1_ALU::u_flags_refresh(struct baffa1_controller_rom *controller_bus, B
 	//if (controller_bus->u_esc_in_src != 0x00) // byte do escape 
 		//this->u_esc = controller_bus->imm & 0b00000011;
 
-	// nao posso usar final condition sem ter atualizado o MSW
-	alu_bus.final_condition = this->calc_final_condition(controller_bus, reg_status_value, reg_flags_value);
+
 	//////
 
 	if (config.DEBUG_UFLAGS) {
@@ -253,16 +350,10 @@ void BAFFA1_ALU::u_flags_refresh(struct baffa1_controller_rom *controller_bus, B
 }
 
 
-// usado apenas pelo update_final_condition
-BAFFA1_BYTE BAFFA1_ALU::int_pending(struct baffa1_controller_rom *controller_bus, BAFFA1_BYTE reg_status_value) {
-	return get_byte_bit(controller_bus->int_request, 0) & get_byte_bit(reg_status_value, MSWl_INTERRUPT_ENABLE);
-}
-
-
 
 
 BAFFA1_BYTE BAFFA1_ALU::calc_final_condition(struct baffa1_controller_rom *controller_bus, BAFFA1_BYTE reg_status_value, BAFFA1_BYTE reg_flags_value) {
-	
+
 	BAFFA1_BYTE condition = 0x0;
 
 	if (!get_byte_bit(controller_bus->cond_sel, 3)) {
@@ -289,7 +380,7 @@ BAFFA1_BYTE BAFFA1_ALU::calc_final_condition(struct baffa1_controller_rom *contr
 		BAFFA1_BYTE SFneqOF = inSF ^ inOF; //XOR //4
 		BAFFA1_BYTE ZForSFneqOF = inZF | SFneqOF; //5
 		BAFFA1_BYTE ZForCF = inZF | inCF;		 //6
-		
+
 
 		//IC_CMP1
 		switch (controller_bus->cond_sel & 0b00000111) {
@@ -377,7 +468,7 @@ void BAFFA1_ALU::baffa1_alu_display_registers(struct baffa1_controller_rom *cont
 	hw_tty.print("B:"); print_byte_bin(str_out, this->B); hw_tty.print(str_out); hw_tty.print("  | ");
 	hw_tty.print("C:"); print_byte_bin(str_out, this->C); hw_tty.print(str_out); hw_tty.print("  | ");
 	hw_tty.print("Z_bus:"); print_byte_bin(str_out, alu_bus.z_bus); hw_tty.print(str_out);
-	
+
 	hw_tty.print("\n");
 	hw_tty.print("* Cin:"); print_nibble_bin(str_out, this->CIN); hw_tty.print(str_out); hw_tty.print(" | ");
 	hw_tty.print("Cout:"); print_nibble_bin(str_out, this->COUT); hw_tty.print(str_out);
@@ -408,7 +499,7 @@ void BAFFA1_ALU::display_debug_alu(struct baffa1_controller_rom *controller_bus,
 	hw_tty.print("***** ALU\n");
 	this->baffa1_alu_display_registers(controller_bus, alu_bus, hw_tty);
 	hw_tty.print("*****\n");
-	
+
 	hw_tty.print("Final Condition : "); print_nibble_bin(str_out, alu_bus.final_condition); hw_tty.print(str_out);
 	/*
 	sprintf(str_out, " | alu_a_src=%02x", controller_bus->alu_a_src); hw_tty.print(str_out);
@@ -464,3 +555,292 @@ void BAFFA1_ALU::display_u_flags_lite(struct baffa1_controller_rom *controller_b
 	sprintf(str_out, " | u_of_in_src:%02x", controller_bus->uof_in_src); hw_tty.print(str_out);
 	hw_tty.print("\n");
 }
+
+
+
+
+
+
+
+
+
+//////////////////////
+
+
+
+
+void  BAFFA1_ALU::mswh_flags_desc(HW_TTY& hw_tty) {
+
+	BAFFA1_BYTE b = this->MSWh.value();
+	hw_tty.print(" [");
+	if (get_byte_bit(b, MSWh_ZF) != 0x00)
+		hw_tty.print("Z"); else hw_tty.print(" ");
+	if (get_byte_bit(b, MSWh_CF) != 0x00)
+		hw_tty.print("C"); else hw_tty.print(" ");
+	if (get_byte_bit(b, MSWh_SF) != 0x00)
+		hw_tty.print("S"); else hw_tty.print(" ");
+	if (get_byte_bit(b, MSWh_OF) != 0x00)
+		hw_tty.print("O"); else hw_tty.print(" ");
+	hw_tty.print("]");
+}
+
+
+
+
+void BAFFA1_ALU::mswl_status_desc(HW_TTY& hw_tty) {
+
+	BAFFA1_BYTE b = this->MSWl.value();
+	if (get_byte_bit(b, MSWl_DMA_ACK) != 0x00)
+		hw_tty.print(" | dma_ack ");
+	if (get_byte_bit(b, MSWl_INTERRUPT_ENABLE) != 0x00)
+		hw_tty.print(" | interrupt_enable ");
+	if (get_byte_bit(b, MSWl_CPU_MODE) != 0x00)
+		hw_tty.print(" | cpu_mode ");
+	if (get_byte_bit(b, MSWl_PAGING_EN) != 0x00)
+		hw_tty.print(" | paging_en ");
+	if (get_byte_bit(b, MSWl_HALT) != 0x00)
+		hw_tty.print(" | halt ");
+	if (get_byte_bit(b, MSWl_DISPLAY_REG_LOAD) != 0x00)
+		hw_tty.print(" | display_reg_load ");
+	if (get_byte_bit(b, MSWl_DIR) != 0x00)
+		hw_tty.print(" | dir ");
+}
+
+
+
+
+
+BAFFA1_BYTE BAFFA1_ALU::get_MSWh_ZF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus) {
+
+	BAFFA1_BYTE inMSWh_ZF = 0x00;
+
+	switch (controller_bus->zf_in_src & 0b00000011) {
+	case 0x00:
+		inMSWh_ZF = get_byte_bit(this->MSWh.value(), MSWh_ZF);
+		break;
+
+	case 0x01:
+		inMSWh_ZF = get_byte_bit(alu_bus.alu_zf, 0);
+		break;
+	case 0x02:
+		inMSWh_ZF = get_byte_bit(alu_bus.alu_zf & get_byte_bit(this->MSWh.value(), MSWh_ZF), 0);
+		break;
+
+	case 0x03:
+		inMSWh_ZF = get_byte_bit(alu_bus.z_bus, 0);
+		break;
+	}
+
+	return inMSWh_ZF;
+}
+
+
+BAFFA1_BYTE BAFFA1_ALU::get_MSWh_CF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus) {
+
+	BAFFA1_BYTE inMSWh_CF = 0x00;
+
+	switch (controller_bus->cf_in_src & 0b00000111) {
+	case 0x00:
+		inMSWh_CF = get_byte_bit(this->MSWh.value(), MSWh_CF);
+		break;
+
+	case 0x01:
+		inMSWh_CF = get_byte_bit(alu_bus.alu_final_cf, 0);
+		break;
+
+	case 0x02:
+		inMSWh_CF = get_byte_bit(alu_bus.alu_output, 0);
+		break;
+
+	case 0x03:
+		inMSWh_CF = get_byte_bit(alu_bus.z_bus, 1);
+		break;
+
+	case 0x04:
+		inMSWh_CF = get_byte_bit(alu_bus.alu_output, 7);
+		break;
+	}
+
+	return inMSWh_CF;
+}
+
+BAFFA1_BYTE BAFFA1_ALU::get_MSWh_SF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus) {
+
+	BAFFA1_BYTE inMSWh_SF = 0x00;
+
+	switch (controller_bus->sf_in_src & 0b00000011) {
+	case 0x00:
+
+		inMSWh_SF = get_byte_bit(this->MSWh.value(), MSWh_SF);
+		break;
+
+	case 0x01:
+		inMSWh_SF = get_byte_bit(alu_bus.z_bus, 7);
+		break;
+
+	case 0x02:
+		inMSWh_SF = 0x00;
+		break;
+
+	case 0x03:
+		inMSWh_SF = get_byte_bit(alu_bus.z_bus, 2);
+		break;
+	}
+
+	return inMSWh_SF;
+}
+
+BAFFA1_BYTE BAFFA1_ALU::get_MSWh_OF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE u_sf) {
+
+	BAFFA1_BYTE inMSWh_OF = 0x00;
+
+	switch (controller_bus->of_in_src & 0b00000111) {
+	case 0x00:
+		inMSWh_OF = get_byte_bit(this->MSWh.value(), MSWh_OF);
+		break;
+
+	case 0x01:
+		inMSWh_OF = get_byte_bit(alu_bus.alu_of, 0);
+		break;
+
+	case 0x02:
+		inMSWh_OF = get_byte_bit(alu_bus.z_bus, 7);
+		break;
+
+	case 0x03:
+		inMSWh_OF = get_byte_bit(alu_bus.z_bus, 3);
+		break;
+
+	case 0x04:
+		inMSWh_OF = get_byte_bit(u_sf, 0) != get_byte_bit(alu_bus.z_bus, 7);
+		break;
+	}
+
+	return inMSWh_OF;
+}
+
+
+void BAFFA1_ALU::refresh_reg_flags_MSWh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE u_sf) {
+
+	BAFFA1_BYTE inMSWh_ZF = get_MSWh_ZF(controller_bus, alu_bus);
+	BAFFA1_BYTE inMSWh_CF = get_MSWh_CF(controller_bus, alu_bus);
+	BAFFA1_BYTE inMSWh_SF = get_MSWh_SF(controller_bus, alu_bus);
+	BAFFA1_BYTE inMSWh_OF = get_MSWh_OF(controller_bus, alu_bus, u_sf);
+
+	BAFFA1_BYTE inMSW_H = set_byte_bit(inMSWh_ZF, 0) | set_byte_bit(inMSWh_CF, 1) | set_byte_bit(inMSWh_SF, 2) | set_byte_bit(inMSWh_OF, 3);
+	this->MSWh.set(inMSW_H);
+	//}
+}
+
+
+
+void BAFFA1_ALU::refresh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE data_bus, BAFFA1_BYTE u_sf, BAFFA1_CONFIG& config, FILE *fa) {
+	//#######################
+//IC86B //IC58B //IC86C //IC241 //IC14 //IC255 //IC23
+
+//
+	BAFFA1_BYTE inMSWh_ZF = get_MSWh_ZF(controller_bus, alu_bus);
+	BAFFA1_BYTE inMSWh_CF = get_MSWh_CF(controller_bus, alu_bus);
+	BAFFA1_BYTE inMSWh_SF = get_MSWh_SF(controller_bus, alu_bus);
+	BAFFA1_BYTE inMSWh_OF = get_MSWh_OF(controller_bus, alu_bus, u_sf);
+
+	//
+
+	//if (0x01) { // ~RST
+		//IC206
+	BAFFA1_BYTE inMSW_H = set_byte_bit(inMSWh_ZF, 0) | set_byte_bit(inMSWh_CF, 1) | set_byte_bit(inMSWh_SF, 2) | set_byte_bit(inMSWh_OF, 3);
+	this->MSWh.set(inMSW_H);
+	//}
+
+	if (controller_bus->status_wrt == 0x00) {
+		this->MSWl.set(alu_bus.z_bus);
+	}
+
+	if (controller_bus->gh_wrt == 0x00) { this->Gh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"Gh", alu_bus.z_bus); } }
+	if (controller_bus->gl_wrt == 0x00) { this->Gl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"Gl", alu_bus.z_bus); } }
+}
+
+
+
+
+
+BAFFA1_BYTE BAFFA1_ALU::y_bus_refresh(BAFFA1_BYTE k_bus, BAFFA1_BYTE imm,
+	BAFFA1_BYTE alu_b_src) {
+
+	BAFFA1_BYTE y_bus = 0x00;
+	// K = Y
+	if (alu_b_src == 0x00)
+		//return imm or k_bus
+		y_bus = imm;
+	else {
+		// return MDR or TDR
+		y_bus = k_bus;
+	}
+
+	return y_bus;
+}
+
+
+
+
+
+BAFFA1_BYTE BAFFA1_ALU::x_bus_refresh(BAFFA1_BYTE w_bus, BAFFA1_BYTE alu_a_src)
+{
+
+	BAFFA1_BYTE x_bus = 0x00;
+
+	if (!get_byte_bit(alu_a_src, 5))
+		x_bus = w_bus;
+
+	else {
+
+		switch ((alu_a_src & 0b00000011)) {
+		case 0x00:
+
+			x_bus = set_byte_bit(get_byte_bit(MSWh.value(), MSWh_ZF), 0) |
+				set_byte_bit(get_byte_bit(MSWh.value(), MSWh_CF), 1) |
+				set_byte_bit(get_byte_bit(MSWh.value(), MSWh_SF), 2) |
+				set_byte_bit(get_byte_bit(MSWh.value(), MSWh_OF), 3) |
+				set_byte_bit(get_byte_bit(MSWh.value(), MSWh_12), 4) |
+				set_byte_bit(get_byte_bit(MSWh.value(), MSWh_13), 5) |
+				set_byte_bit(get_byte_bit(MSWh.value(), MSWh_14), 6) |
+				set_byte_bit(get_byte_bit(MSWh.value(), MSWh_15), 7);
+			break;
+
+		case 0x01:
+
+			x_bus = get_byte_bit(MSWl.value(), MSWl_DMA_ACK) |
+				set_byte_bit(get_byte_bit(MSWl.value(), MSWl_INTERRUPT_ENABLE), 1) |
+				set_byte_bit(get_byte_bit(MSWl.value(), MSWl_CPU_MODE), 2) |
+				set_byte_bit(get_byte_bit(MSWl.value(), MSWl_PAGING_EN), 3) |
+				set_byte_bit(get_byte_bit(MSWl.value(), MSWl_HALT), 4) |
+				set_byte_bit(get_byte_bit(MSWl.value(), MSWl_DISPLAY_REG_LOAD), 5) |
+				set_byte_bit(get_byte_bit(MSWl.value(), MSWl_14), 6) |
+				set_byte_bit(get_byte_bit(MSWl.value(), MSWl_DIR), 7);
+			break;
+
+		case 0x02:
+			x_bus = Gl.value();
+			break;
+
+		case 0x03:
+			x_bus = Gh.value();
+			break;
+		}
+	}
+
+	return x_bus;
+}
+//////////////////////
+
+
+
+// usado apenas pelo update_final_condition
+BAFFA1_BYTE BAFFA1_ALU::int_pending(struct baffa1_controller_rom *controller_bus, BAFFA1_BYTE reg_status_value) {
+	return get_byte_bit(controller_bus->int_request, 0) & get_byte_bit(reg_status_value, MSWl_INTERRUPT_ENABLE);
+}
+
+
+
+
+

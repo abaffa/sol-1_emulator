@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "utils.h"
 
-BAFFA1_REGISTERS::BAFFA1_REGISTERS() {}
+BAFFA1_REGISTERS::BAFFA1_REGISTERS() { }
 
 
 BAFFA1_DWORD BAFFA1_REGISTERS::value(BAFFA1_REGISTER_8BIT& l, BAFFA1_REGISTER_8BIT& h) {
@@ -40,10 +40,28 @@ void BAFFA1_REGISTERS::reset(BAFFA1_REGISTER_8BIT& l, BAFFA1_REGISTER_8BIT& h) {
 
 
 
-void BAFFA1_REGISTERS::refresh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE data_bus, BAFFA1_BYTE u_sf, BAFFA1_CONFIG& config, FILE *fa) {
+
+BAFFA1_BYTE BAFFA1_REGISTERS::k_bus_refresh(BAFFA1_BYTE alu_b_src) {
+
+	//IC92 //I103 //IC116
+
+	BAFFA1_BYTE k_bus = 0x00;
+	switch (alu_b_src & 0b00000011) {
+	case 0x00: k_bus = MDRl.value(); break;
+	case 0x01: k_bus = MDRh.value(); break;
+	case 0x02: k_bus = TDRl.value(); break;
+	case 0x03: k_bus = TDRh.value(); break;
+	}
+
+	return k_bus;
+}
+
+
+
+void BAFFA1_REGISTERS::refresh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU& alu, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE data_bus, BAFFA1_BYTE u_sf, BAFFA1_CONFIG& config, FILE *fa) {
 	//#######################
 //IC86B //IC58B //IC86C //IC241 //IC14 //IC255 //IC23
-
+	/*
 //
 	BAFFA1_BYTE inMSWh_ZF = get_MSWh_ZF(controller_bus, alu_bus);
 	BAFFA1_BYTE inMSWh_CF = get_MSWh_CF(controller_bus, alu_bus);
@@ -61,7 +79,7 @@ void BAFFA1_REGISTERS::refresh(struct baffa1_controller_rom *controller_bus, BAF
 	if (controller_bus->status_wrt == 0x00) {
 		this->MSWl.set(alu_bus.z_bus);
 	}
-
+	*/
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -79,37 +97,33 @@ void BAFFA1_REGISTERS::refresh(struct baffa1_controller_rom *controller_bus, BAF
 	if (controller_bus->dh_wrt == 0x00) { this->Dh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"Dh", alu_bus.z_bus); } }
 	if (controller_bus->dl_wrt == 0x00) { this->Dl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"Dl", alu_bus.z_bus); } }
 
-	if (controller_bus->gh_wrt == 0x00) { this->Gh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"Gh", alu_bus.z_bus); } }
-	if (controller_bus->gl_wrt == 0x00) { this->Gl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"Gl", alu_bus.z_bus); } }
+	//Index Registers
+	if (controller_bus->dih_wrt == 0x00) { this->DIh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"DIh", alu_bus.z_bus); } }
+	if (controller_bus->dil_wrt == 0x00) { this->DIl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"DIl", alu_bus.z_bus); } }
+
+	if (controller_bus->sih_wrt == 0x00) { this->SIh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SIh", alu_bus.z_bus); } }
+	if (controller_bus->sil_wrt == 0x00) { this->SIl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SIl", alu_bus.z_bus); } }
 
 	//Pointer Registers
 	if (controller_bus->bph_wrt == 0x00) { this->BPh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"BPh", alu_bus.z_bus); } }
 	if (controller_bus->bpl_wrt == 0x00) { this->BPl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"BPl", alu_bus.z_bus); } }
 
+	if (controller_bus->sph_wrt == 0x00) { this->SPh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SPh", alu_bus.z_bus); } }
+	if (controller_bus->spl_wrt == 0x00) { this->SPl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SPl", alu_bus.z_bus); } }
+	
 	// MSWl_CPU_MODE = 0 >> update both sp and ssp 
 	// MSWl_CPU_MODE = 1 >> update only sp
-	if (!get_byte_bit(this->MSWl.value(), MSWl_CPU_MODE)) {
+	if (!get_byte_bit(alu.MSWl.value(), MSWl_CPU_MODE)) {
 		if (controller_bus->sph_wrt == 0x00){ this->SSPh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SSPh", alu_bus.z_bus); } }
 		if (controller_bus->spl_wrt == 0x00){ this->SSPl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SSPl", alu_bus.z_bus); } }
 	}
 
-	if (controller_bus->sph_wrt == 0x00) { this->SPh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SPh", alu_bus.z_bus); } }
-	if (controller_bus->spl_wrt == 0x00) { this->SPl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SPl", alu_bus.z_bus); } }
-
-	//Index Registers
-	if (controller_bus->sih_wrt == 0x00) { this->SIh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SIh", alu_bus.z_bus); } }
-	if (controller_bus->sil_wrt == 0x00) { this->SIl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"SIl", alu_bus.z_bus); } }
-
-	if (controller_bus->dih_wrt == 0x00) { this->DIh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"DIh", alu_bus.z_bus); } }
-	if (controller_bus->dil_wrt == 0x00) { this->DIl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"DIl", alu_bus.z_bus); } }
-
-	if (controller_bus->pch_wrt == 0x00) { this->PCh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"PCh", alu_bus.z_bus); } }
-	if (controller_bus->pcl_wrt == 0x00) { this->PCl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"PCl", alu_bus.z_bus); } }
-
 	if (controller_bus->tdrh_wrt == 0x00) { this->TDRh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"TDRh", alu_bus.z_bus); } }
 	if (controller_bus->tdrl_wrt == 0x00) { this->TDRl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"TDRl", alu_bus.z_bus); } }
 
-	if (controller_bus->ptb_wrt == 0x00) { this->PTB.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"PTB", alu_bus.z_bus); } }
+
+	if (controller_bus->pch_wrt == 0x00) { this->PCh.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"PCh", alu_bus.z_bus); } }
+	if (controller_bus->pcl_wrt == 0x00) { this->PCl.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"PCl", alu_bus.z_bus); } }
 
 	/////////////////////////////////////////////////////////////////////////////
 	if (controller_bus->mask_flags_wrt == 0x00) this->INT_MASKS.set(alu_bus.z_bus);
@@ -145,170 +159,186 @@ void BAFFA1_REGISTERS::refresh(struct baffa1_controller_rom *controller_bus, BAF
 			if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"MARh", this->PCh.value()); }
 		}
 	}
+
+
+
+
+
+
+
+
+	// deve ser lá na memoria
+	if (controller_bus->ptb_wrt == 0x00) { this->PTB.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"PTB", alu_bus.z_bus); } }
 }
 
 
 
+BAFFA1_BYTE BAFFA1_REGISTERS::w_bus_refresh(
+	//BAFFA1_ALU& baffa1_alu,
+	//BAFFA1_REGISTERS& baffa1_registers,
+	BAFFA1_BYTE bus_tristate,
+	BAFFA1_BYTE panel_regsel,
+	BAFFA1_BYTE alu_a_src,
+	BAFFA1_BYTE display_reg_load,
+	BAFFA1_BYTE int_vector,
+	BAFFA1_BYTE int_masks,
+	BAFFA1_BYTE int_status,
+	FILE *fa, BAFFA1_BYTE DEBUG_RDREG, HW_TTY& hw_tty) {
 
-void  BAFFA1_REGISTERS::mswh_flags_desc(HW_TTY& hw_tty) {
+	//IC125 //IC118 //IC3   //IC2  //IC9  //IC42  //IC6   //IC20 //IC5  //IC80  //IC41  //IC44
+	//IC30  //IC130 //IC56  //IC62 //IC53 //IC133 //IC68  //IC69 //IC67 //IC141 //IC81
+	//IC82  //IC71  //IC144 //IC85 //IC86 //IC84  //IC152 //IC88 //IC89 //IC86  //IC160
 
-	BAFFA1_BYTE b = this->MSWh.value();
-	hw_tty.print(" [");
-	if (get_byte_bit(b, MSWh_ZF) != 0x00)
-		hw_tty.print("Z"); else hw_tty.print(" ");
-	if (get_byte_bit(b, MSWh_CF) != 0x00)
-		hw_tty.print("C"); else hw_tty.print(" ");
-	if (get_byte_bit(b, MSWh_SF) != 0x00)
-		hw_tty.print("S"); else hw_tty.print(" ");
-	if (get_byte_bit(b, MSWh_OF) != 0x00)
-		hw_tty.print("O"); else hw_tty.print(" ");
-	hw_tty.print("]");
-}
+	//char str_out[255];
 
+	BAFFA1_BYTE w_bus = 0x00;
 
+	BAFFA1_BYTE selRegCol = 0x00;
+	BAFFA1_BYTE selRegRow = 0x00;
 
-
-void BAFFA1_REGISTERS::mswl_status_desc(HW_TTY& hw_tty) {
-
-	BAFFA1_BYTE b = this->MSWl.value();
-	if (get_byte_bit(b, MSWl_DMA_ACK) != 0x00)
-		hw_tty.print(" | dma_ack ");
-	if (get_byte_bit(b, MSWl_INTERRUPT_ENABLE) != 0x00)
-		hw_tty.print(" | interrupt_enable ");
-	if (get_byte_bit(b, MSWl_CPU_MODE) != 0x00)
-		hw_tty.print(" | cpu_mode ");
-	if (get_byte_bit(b, MSWl_PAGING_EN) != 0x00)
-		hw_tty.print(" | paging_en ");
-	if (get_byte_bit(b, MSWl_HALT) != 0x00)
-		hw_tty.print(" | halt ");
-	if (get_byte_bit(b, MSWl_DISPLAY_REG_LOAD) != 0x00)
-		hw_tty.print(" | display_reg_load ");
-	if (get_byte_bit(b, MSWl_DIR) != 0x00)
-		hw_tty.print(" | dir ");
-}
-
-
-
-
-
-BAFFA1_BYTE BAFFA1_REGISTERS::get_MSWh_ZF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus) {
-
-	BAFFA1_BYTE inMSWh_ZF = 0x00;
-
-	switch (controller_bus->zf_in_src & 0b00000011) {
-	case 0x00:
-		inMSWh_ZF = get_byte_bit(this->MSWh.value(), MSWh_ZF);
-		break;
-
-	case 0x01:
-		inMSWh_ZF = get_byte_bit(alu_bus.alu_zf, 0);
-		break;
-	case 0x02:
-		inMSWh_ZF = get_byte_bit(alu_bus.alu_zf & get_byte_bit(this->MSWh.value(), MSWh_ZF), 0);
-		break;
-
-	case 0x03:
-		inMSWh_ZF = get_byte_bit(alu_bus.z_bus, 0);
-		break;
+	// Seleciona registro pelo barramento
+	if ((bus_tristate == 0x00) & (display_reg_load == 0x00)) {
+		selRegCol = alu_a_src & 0b00000111;
+		selRegRow = get_byte_bit(alu_a_src, 3) | set_byte_bit(get_byte_bit(alu_a_src, 4), 1);
+	}
+	else { // Seleciona registro pelo painel
+		selRegCol = panel_regsel & 0b00000111;
+		selRegRow = get_byte_bit(panel_regsel, 3) | set_byte_bit(get_byte_bit(panel_regsel, 4), 1);
 	}
 
-	return inMSWh_ZF;
-}
+	if (selRegRow == 0x00) {
+		switch (selRegCol) {
+		case 0x00:
+			w_bus = Al.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"Al", w_bus); }
+			break;
+		case 0x01:
+			w_bus = Ah.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"Ah", w_bus); }
+			break;
+		case 0x02:
+			w_bus = Bl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"Bl", w_bus); }
+			break;
+		case 0x03:
+			w_bus = Bh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"Bh", w_bus); }
+			break;
+		case 0x04:
+			w_bus = Cl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"Cl", w_bus); }
+			break;
+		case 0x05:
+			w_bus = Ch.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"Ch", w_bus); }
+			break;
+		case 0x06:
+			w_bus = Dl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"Dl", w_bus); }
+			break;
+		case 0x07:
+			w_bus = Dh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"Dh", w_bus); }
+			break;
+		}
 
-
-BAFFA1_BYTE  BAFFA1_REGISTERS::get_MSWh_CF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus) {
-
-	BAFFA1_BYTE inMSWh_CF = 0x00;
-
-	switch (controller_bus->cf_in_src & 0b00000111) {
-	case 0x00:
-		inMSWh_CF = get_byte_bit(this->MSWh.value(), MSWh_CF);
-		break;
-
-	case 0x01:
-		inMSWh_CF = get_byte_bit(alu_bus.alu_final_cf, 0);
-		break;
-
-	case 0x02:
-		inMSWh_CF = get_byte_bit(alu_bus.alu_output, 0);
-		break;
-
-	case 0x03:
-		inMSWh_CF = get_byte_bit(alu_bus.z_bus, 1);
-		break;
-
-	case 0x04:
-		inMSWh_CF = get_byte_bit(alu_bus.alu_output, 7);
-		break;
 	}
-
-	return inMSWh_CF;
-}
-
-BAFFA1_BYTE BAFFA1_REGISTERS::get_MSWh_SF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus) {
-
-	BAFFA1_BYTE inMSWh_SF = 0x00;
-
-	switch (controller_bus->sf_in_src & 0b00000011) {
-	case 0x00:
-
-		inMSWh_SF = get_byte_bit(this->MSWh.value(), MSWh_SF);
-		break;
-
-	case 0x01:
-		inMSWh_SF = get_byte_bit(alu_bus.z_bus, 7);
-		break;
-
-	case 0x02:
-		inMSWh_SF = 0x00;
-		break;
-
-	case 0x03:
-		inMSWh_SF = get_byte_bit(alu_bus.z_bus, 2);
-		break;
+	else if (selRegRow == 0x01) {
+		switch (selRegCol) {
+		case 0x00:
+			w_bus = SPl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"SPl", w_bus); }
+			break;
+		case 0x01:
+			w_bus = SPh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"SPh", w_bus); }
+			break;
+		case 0x02:
+			w_bus = BPl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"BPl", w_bus); }
+			break;
+		case 0x03:
+			w_bus = BPh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"BPh", w_bus); }
+			break;
+		case 0x04:
+			w_bus = SIl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"SIl", w_bus); }
+			break;
+		case 0x05:
+			w_bus = SIh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"SIh", w_bus); }
+			break;
+		case 0x06:
+			w_bus = DIl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"DIl", w_bus); }
+			break;
+		case 0x07:
+			w_bus = DIh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"DIh", w_bus); }
+			break;
+		}
 	}
-
-	return inMSWh_SF;
-}
-
-BAFFA1_BYTE BAFFA1_REGISTERS::get_MSWh_OF(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE u_sf) {
-
-	BAFFA1_BYTE inMSWh_OF = 0x00;
-
-	switch (controller_bus->of_in_src & 0b00000111) {
-	case 0x00:
-		inMSWh_OF = get_byte_bit(this->MSWh.value(), MSWh_OF);
-		break;
-
-	case 0x01:
-		inMSWh_OF = get_byte_bit(alu_bus.alu_of, 0);
-		break;
-
-	case 0x02:
-		inMSWh_OF = get_byte_bit(alu_bus.z_bus, 7);
-		break;
-
-	case 0x03:
-		inMSWh_OF = get_byte_bit(alu_bus.z_bus, 3);
-		break;
-
-	case 0x04:
-		inMSWh_OF = get_byte_bit(u_sf, 0) != get_byte_bit(alu_bus.z_bus, 7);
-		break;
+	else if (selRegRow == 0x02) {
+		switch (selRegCol) {
+		case 0x00:
+			w_bus = PCl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"PCl", w_bus); }
+			break;
+		case 0x01:
+			w_bus = PCh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"PCh", w_bus); }
+			break;
+		case 0x02:
+			w_bus = MARl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"MARl", w_bus); }
+			break;
+		case 0x03:
+			w_bus = MARh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"MARh", w_bus); }
+			break;
+		case 0x04:
+			w_bus = MDRl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"MDRl", w_bus); }
+			break;
+		case 0x05:
+			w_bus = MDRh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"MDRh", w_bus); }
+			break;
+		case 0x06:
+			w_bus = TDRl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"TDRl", w_bus); }
+			break;
+		case 0x07:
+			w_bus = TDRh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"TDRh", w_bus); }
+			break;
+		}
 	}
-
-	return inMSWh_OF;
+	else if (selRegRow == 0x03) {
+		switch (selRegCol) {
+		case 0x00:
+			w_bus = SSPl.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"SSPl", w_bus); }
+			break;
+		case 0x01:
+			w_bus = SSPh.value();
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"SSPh", w_bus); }
+			break;
+		case 0x02:
+			w_bus = int_vector;
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"INT_VECTOR", w_bus); }
+			break;
+		case 0x03:
+			w_bus = int_masks;
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"INT_MASKS", w_bus); }
+			break;
+		case 0x04:
+			w_bus = int_status;
+			if (DEBUG_RDREG) { reg8bit_print(fa, (char *)"READ ", (char *)"INT_STATUS", w_bus); }
+			break;
+		}
+	}
+	return w_bus;
 }
 
-
-void BAFFA1_REGISTERS::refresh_reg_flags_MSWh(struct baffa1_controller_rom *controller_bus, BAFFA1_ALU_BUS& alu_bus, BAFFA1_BYTE u_sf) {
-
-	BAFFA1_BYTE inMSWh_ZF = get_MSWh_ZF(controller_bus, alu_bus);
-	BAFFA1_BYTE inMSWh_CF = get_MSWh_CF(controller_bus, alu_bus);
-	BAFFA1_BYTE inMSWh_SF = get_MSWh_SF(controller_bus, alu_bus);
-	BAFFA1_BYTE inMSWh_OF = get_MSWh_OF(controller_bus, alu_bus, u_sf);
-
-	BAFFA1_BYTE inMSW_H = set_byte_bit(inMSWh_ZF, 0) | set_byte_bit(inMSWh_CF, 1) | set_byte_bit(inMSWh_SF, 2) | set_byte_bit(inMSWh_OF, 3);
-	this->MSWh.set(inMSW_H);
-	//}
-}

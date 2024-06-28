@@ -117,7 +117,7 @@ void BAFFA1_COMPUTER::disassembly_current_opcode() {
 			else if (this->ht_opcodes.find(temp) != this->ht_opcodes.end()) {
 				Tasm_Opcode tt = this->ht_opcodes[temp];
 				BAFFA1_MWORD memADDR = BAFFA1_REGISTERS::value(this->cpu.registers.PCl, this->cpu.registers.PCh);
-				unsigned long vmemADDR = this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.registers), this->cpu.microcode, this->cpu.registers);
+				unsigned long vmemADDR = this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.alu), this->cpu.microcode, this->cpu.alu, this->cpu.registers);
 
 				if (memADDR == vmemADDR)
 					sprintf(line, "    %04x]          %02x:%s", (unsigned int)(memADDR - (strlen(temp) / 2)), current_opcode, tt.desc.c_str());
@@ -338,17 +338,17 @@ void BAFFA1_COMPUTER::refresh_int() {
 
 BAFFA1_BYTE  BAFFA1_COMPUTER::buffer_rd() {
 	// BUFFER_RD | BUFFER_RD_MEMORY -> BUS_RD
-	return this->bus.bus_rd(this->cpu.registers, this->cpu.microcode.controller_bus.rd, this->cpu.microcode.controller_bus.panel_rd);
+	return this->bus.bus_rd(this->cpu.alu, this->cpu.microcode.controller_bus.rd, this->cpu.microcode.controller_bus.panel_rd);
 }
 
 BAFFA1_BYTE BAFFA1_COMPUTER::buffer_wr() {
 	// BUFFER_WR | BUFFER_WR_MEMORY -> BUS_WR
-	return this->bus.bus_wr(this->cpu.registers, this->cpu.microcode.controller_bus.wr, this->cpu.microcode.controller_bus.panel_wr);
+	return this->bus.bus_wr(this->cpu.alu, this->cpu.microcode.controller_bus.wr, this->cpu.microcode.controller_bus.panel_wr);
 }
 
 BAFFA1_BYTE BAFFA1_COMPUTER::buffer_mem_io() {
 	// BUFFER_MEM_IO -> BUS_MEM_IO
-	return this->bus.bus_mem_io(this->cpu.registers, this->cpu.microcode.controller_bus.memory_io, this->cpu.microcode.controller_bus.panel_mem_io);
+	return this->bus.bus_mem_io(this->cpu.alu, this->cpu.microcode.controller_bus.memory_io, this->cpu.microcode.controller_bus.panel_mem_io);
 }
 
 ////////
@@ -374,7 +374,7 @@ void BAFFA1_COMPUTER::mem_rd(BAFFA1_BYTE peripherical_sel) {
 	char str_out[255];
 
 	if (buffer_rd() == 0x00) {
-		unsigned long mem_addr = this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.registers), this->cpu.microcode, this->cpu.registers);
+		unsigned long mem_addr = this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.alu), this->cpu.microcode, this->cpu.alu, this->cpu.registers);
 
 		switch (peripherical_sel) {
 		case 0://UART SERVICES INTERRUPT = FF80 to FF85
@@ -484,7 +484,7 @@ void BAFFA1_COMPUTER::mem_wr(BAFFA1_BYTE peripherical_sel) {
 	char str_out[255];
 
 	if (buffer_wr() == 0x00) {
-		unsigned long mem_addr = this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.registers), this->cpu.microcode, this->cpu.registers);
+		unsigned long mem_addr = this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.alu), this->cpu.microcode, this->cpu.alu, this->cpu.registers);
 
 		switch (peripherical_sel) {
 		case 0://UART SERVICES INTERRUPT = FF80 to FF85
@@ -686,11 +686,11 @@ void BAFFA1_COMPUTER::bus_update() {
 	if (!get_byte_bit(this->cpu.microcode.controller_bus.alu_a_src, 5)){
 		// return 
 		// Flags, Status, Gl, Gh
-		this->bus.w_bus = this->bus.w_bus_refresh(this->cpu.registers, this->cpu.microcode.controller_bus.panel_regsel,
+		this->cpu.registers.registers_bus.w_bus = this->cpu.registers.w_bus_refresh(this->bus.bus_tristate(this->cpu.alu), this->cpu.microcode.controller_bus.panel_regsel,
 			this->cpu.microcode.controller_bus.alu_a_src, this->cpu.microcode.controller_bus.display_reg_load && this->cpu.display_reg_load,
 			this->cpu.microcode.controller_bus.int_vector, this->cpu.registers.INT_MASKS.value(), this->cpu.microcode.controller_bus.int_status, fa, this->cpu.config.DEBUG_TRACE_RDREG, this->_hw_tty);
 
-		this->bus.alu_bus.x_bus = this->bus.w_bus;
+		//this->cpu.alu.alu_bus.x_bus = this->bus.w_bus;
 	}
 	else {
 		// return from any register
@@ -698,35 +698,26 @@ void BAFFA1_COMPUTER::bus_update() {
 		// SP, BP, SI, DI
 		// PC, MAR, MDR, TDR
 		// SPP, INT_VECTOR, INT_MASKS, INT_STATUS
-		this->bus.alu_bus.x_bus = this->bus.x_bus_refresh(this->cpu.registers, this->cpu.microcode.controller_bus.alu_a_src);// , this->bus.w_bus);
+		//this->cpu.alu.alu_bus.x_bus = this->bus.x_bus_refresh(this->cpu.alu, this->cpu.microcode.controller_bus.alu_a_src);// , this->bus.w_bus);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////
-	// K = Y
-	if (this->cpu.microcode.controller_bus.alu_b_src == 0x00)
-		//return imm or k_bus
-		this->bus.alu_bus.y_bus = this->cpu.microcode.controller_bus.imm;
-	else {
-		// return MDR or TDR
-		this->bus.k_bus = this->bus.k_bus_refresh(this->cpu.registers, this->cpu.microcode.controller_bus.alu_b_src);
-		this->bus.alu_bus.y_bus = this->bus.k_bus;
-	}
+	// return MDR or TDR
+		this->cpu.registers.registers_bus.k_bus = this->cpu.registers.k_bus_refresh(this->cpu.microcode.controller_bus.alu_b_src);
 	////////////////////////////////////////////////////////////////////////////
-
-
 	
 	
 }
 
 void BAFFA1_COMPUTER::alu_update() {
-	this->cpu.alu.ALU_EXEC(&this->cpu.microcode.controller_bus, this->bus.alu_bus, this->cpu.alu.u_cf, get_byte_bit(this->cpu.registers.MSWh.value(), MSWh_CF), this->cpu.config, this->_hw_tty);
+	this->cpu.alu.ALU_EXEC(&this->cpu.microcode.controller_bus, this->cpu.registers.registers_bus.w_bus, this->cpu.registers.registers_bus.k_bus, this->cpu.alu.u_cf, get_byte_bit(this->cpu.alu.MSWh.value(), MSWh_CF), this->cpu.config, this->_hw_tty,fa);
 	
 	// nao posso usar final condition sem ter atualizado o MSW
-	this->cpu.registers.refresh_reg_flags_MSWh(&this->cpu.microcode.controller_bus, this->bus.alu_bus, this->cpu.alu.u_sf);
+	//this->cpu.alu.refresh_reg_flags_MSWh(&this->cpu.microcode.controller_bus, this->cpu.alu.alu_bus, this->cpu.alu.u_sf);
 
 	// nao posso usar final condition sem ter atualizado o MSW
-	this->cpu.alu.u_flags_refresh(&this->cpu.microcode.controller_bus, this->cpu.registers.MSWl.value(), this->cpu.registers.MSWh.value(), this->bus.alu_bus, this->cpu.config, this->_hw_tty);
+	//this->cpu.alu.u_flags_refresh(&this->cpu.microcode.controller_bus, this->cpu.alu.MSWl.value(), this->cpu.alu.MSWh.value(), this->cpu.alu.alu_bus, this->cpu.config, this->_hw_tty);
 }
 
 
@@ -746,7 +737,7 @@ void BAFFA1_COMPUTER::clock_high() {
 
 	////////////////////////////////////////////////////////////////////////////
 	// MEMORY / PERIPHERAL READ/WRITE
-	unsigned long memADDR = this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.registers), this->cpu.microcode, this->cpu.registers);
+	unsigned long memADDR = this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.alu), this->cpu.microcode, this->cpu.alu, this->cpu.registers);
 	
 	BAFFA1_BYTE peripheral_sel = this->peripheral_selection(memADDR, buffer_mem_io());
 
@@ -768,16 +759,17 @@ void BAFFA1_COMPUTER::clock_low() {
 	// IR 
 	// GENERAL
 	//if (this->cpu.microcode.controller_bus.ir_wrt == 0x00) this->cpu.microcode.IR.set(this->bus.data_bus);
-	this->cpu.registers.refresh(&this->cpu.microcode.controller_bus, this->bus.alu_bus, this->bus.data_bus, this->cpu.alu.u_sf, this->cpu.config, fa);
-	this->cpu.memory.refresh_pagetable_mem(this->cpu.microcode, this->cpu.registers);	// PAGETABLE 	
+	//this->cpu.alu.refresh(&this->cpu.microcode.controller_bus, this->cpu.alu.alu_bus, this->bus.data_bus, this->cpu.alu.u_sf, this->cpu.config, fa);
+	this->cpu.registers.refresh(&this->cpu.microcode.controller_bus, this->cpu.alu, this->cpu.alu.alu_bus, this->bus.data_bus, this->cpu.alu.u_sf, this->cpu.config, fa);
+	this->cpu.memory.refresh_pagetable_mem(this->cpu.microcode, this->cpu.alu, this->cpu.registers);	// PAGETABLE 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////////////
 	// MICROCODE
-	this->cpu.memory.refresh_int_pending(this->cpu.microcode, this->cpu.registers);
+	this->cpu.memory.refresh_int_pending(this->cpu.microcode, this->cpu.alu, this->cpu.registers);
 	this->cpu.memory.refresh_any_interruption(this->cpu.microcode);
 
-	this->cpu.microcode.sequencer_start(this->cpu.microcode.controller_bus.any_interruption, this->bus.alu_bus.final_condition, this->bus);		// Sets Microcode
+	this->cpu.microcode.sequencer_start(this->cpu.microcode.controller_bus.any_interruption, this->cpu.alu.alu_bus.final_condition, this->bus);		// Sets Microcode
 	this->cpu.microcode.debugger(this->cpu.config, this->_hw_tty);
 	this->cpu.microcode.sequencer_end();
 	///////////////////////////////////////////////////////////////////////////		
@@ -818,7 +810,7 @@ void BAFFA1_COMPUTER::debug_cycle() {
 	if (this->cpu.config.DEBUG_BUSES) {
 		this->_hw_tty.print("***** BUS\n");
 		sprintf(str_out, "* u_ad_bus    : "); print_word_bin(str_out + strlen(str_out), this->cpu.microcode.u_ad_bus); sprintf(str_out + strlen(str_out), "\n"); this->_hw_tty.print(str_out);
-		sprintf(str_out, "* address bus : "); print_byte_bin(str_out + strlen(str_out), (BAFFA1_BYTE)(this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.registers), this->cpu.microcode, this->cpu.registers) >> 16)); sprintf(str_out + strlen(str_out), " ");  print_word_bin(str_out + strlen(str_out), this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.registers), this->cpu.microcode, this->cpu.registers)); sprintf(str_out + strlen(str_out), "\n"); this->_hw_tty.print(str_out);
+		sprintf(str_out, "* address bus : "); print_byte_bin(str_out + strlen(str_out), (BAFFA1_BYTE)(this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.alu), this->cpu.microcode, this->cpu.alu, this->cpu.registers) >> 16)); sprintf(str_out + strlen(str_out), " ");  print_word_bin(str_out + strlen(str_out), this->cpu.memory.read_address_bus(this->bus.bus_tristate(this->cpu.alu), this->cpu.microcode, this->cpu.alu, this->cpu.registers)); sprintf(str_out + strlen(str_out), "\n"); this->_hw_tty.print(str_out);
 		sprintf(str_out, "*  data_bus   |"); this->_hw_tty.print(str_out);
 		sprintf(str_out, "    k_bus    |"); this->_hw_tty.print(str_out);
 		sprintf(str_out, "    w_bus    |"); this->_hw_tty.print(str_out);
@@ -827,11 +819,11 @@ void BAFFA1_COMPUTER::debug_cycle() {
 		sprintf(str_out, "    z_bus    "); this->_hw_tty.print(str_out);
 		this->_hw_tty.print("\n");
 		sprintf(str_out, "  "); print_byte_bin(str_out + strlen(str_out), this->bus.data_bus); this->_hw_tty.print(str_out);
-		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->bus.k_bus); this->_hw_tty.print(str_out);
-		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->bus.w_bus); this->_hw_tty.print(str_out);
-		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->bus.alu_bus.x_bus); this->_hw_tty.print(str_out);
-		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->bus.alu_bus.y_bus); this->_hw_tty.print(str_out);
-		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->bus.alu_bus.z_bus); this->_hw_tty.print(str_out);
+		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->cpu.registers.registers_bus.k_bus); this->_hw_tty.print(str_out);
+		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->cpu.registers.registers_bus.w_bus); this->_hw_tty.print(str_out);
+		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->cpu.alu.alu_bus.x_bus); this->_hw_tty.print(str_out);
+		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->cpu.alu.alu_bus.y_bus); this->_hw_tty.print(str_out);
+		sprintf(str_out, " | "); print_byte_bin(str_out + strlen(str_out), this->cpu.alu.alu_bus.z_bus); this->_hw_tty.print(str_out);
 		this->_hw_tty.print("\n");
 		this->_hw_tty.print("\n");
 	}

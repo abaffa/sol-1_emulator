@@ -1,5 +1,5 @@
 //
-// baffa1_bus.h
+// baffa1_registers_bus.cpp
 //
 ////// BEGIN LICENSE NOTICE//////
 //
@@ -15,32 +15,14 @@
 //
 ////// END LICENSE NOTICE//////
 //
-#ifndef BAFFA1BUS_H
-#define BAFFA1BUS_H
-#include "config.h"
-#include "baffa1_registers.h"
-#include "baffa1_alu_board.h"
-#include "baffa1_alu_bus.h"
-#include "hw_tty.h"
+#include "baffa1_registers_bus.h"
+#include "utils.h"
 
-class BAFFA1_BUS {
-	
-public:
-	BAFFA1_BYTE data_bus;
+void BAFFA1_REGISTERS_BUS::init() {
+	this->reset();
+}
 
-	//BAFFA1_BYTE k_bus; // input pra alu k -> y
-	//BAFFA1_BYTE w_bus; // input pra alu w -> x
-	
-	//BAFFA1_ALU_BUS alu_bus;
-
-	/////
-	BAFFA1_BYTE bus_tristate(BAFFA1_ALU& baffa1_alu);
-	BAFFA1_BYTE bus_rd(BAFFA1_ALU& baffa1_alu, BAFFA1_BYTE rd, BAFFA1_BYTE panel_rd);
-	BAFFA1_BYTE bus_wr(BAFFA1_ALU& baffa1_alu, BAFFA1_BYTE wr, BAFFA1_BYTE panel_wr);
-	BAFFA1_BYTE bus_mem_io(BAFFA1_ALU& baffa1_alu, BAFFA1_BYTE mem_io, BAFFA1_BYTE panel_mem_io);
-	/////
-
-	void init();
-	void reset();
-};
-#endif
+void BAFFA1_REGISTERS_BUS::reset() {
+	this->k_bus = 0b00000000; // input pra alu x e y
+	this->w_bus = 0b00000000; // input pra alu x e y
+}

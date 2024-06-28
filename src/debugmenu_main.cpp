@@ -341,13 +341,13 @@ void debugmenu_main_edit_register(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty) {
 		BAFFA1_REGISTERS::set(baffa1_cpu.registers.Dl, baffa1_cpu.registers.Dh, convert_hexstr_to_value(value));
 	}
 	else if (strcmp(input, "G") == 0) {
-		sprintf(str_out, " | G=%04x | Data? ", BAFFA1_REGISTERS::value(baffa1_cpu.registers.Gl, baffa1_cpu.registers.Gh)); hw_tty.print(str_out);
+		sprintf(str_out, " | G=%04x | Data? ", BAFFA1_REGISTERS::value(baffa1_cpu.alu.Gl, baffa1_cpu.alu.Gh)); hw_tty.print(str_out);
 		input = hw_tty.gets(4);
 
 		if (strlen(input) == 0) { hw_tty.print("\n");  return; }
 
 		leftpad(input, value, 4);
-		BAFFA1_REGISTERS::set(baffa1_cpu.registers.Gl, baffa1_cpu.registers.Gh, convert_hexstr_to_value(value));
+		BAFFA1_REGISTERS::set(baffa1_cpu.alu.Gl, baffa1_cpu.alu.Gh, convert_hexstr_to_value(value));
 	}
 
 
@@ -428,13 +428,13 @@ void debugmenu_main_edit_register(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty) {
 		baffa1_cpu.registers.PTB.set(convert_hexstr_to_value(value));
 	}
 	else if (strcmp(input, "MSW") == 0) {
-		sprintf(str_out, " | MSW=%04x | Data? ", BAFFA1_REGISTERS::value(baffa1_cpu.registers.MSWl, baffa1_cpu.registers.MSWh)); hw_tty.print(str_out);
+		sprintf(str_out, " | MSW=%04x | Data? ", BAFFA1_REGISTERS::value(baffa1_cpu.alu.MSWl, baffa1_cpu.alu.MSWh)); hw_tty.print(str_out);
 		input = hw_tty.gets(4);
 
 		if (strlen(input) == 0) { hw_tty.print("\n");  return; }
 
 		leftpad(input, value, 4);
-		BAFFA1_REGISTERS::set(baffa1_cpu.registers.MSWl, baffa1_cpu.registers.MSWh, convert_hexstr_to_value(value));
+		BAFFA1_REGISTERS::set(baffa1_cpu.alu.MSWl, baffa1_cpu.alu.MSWh, convert_hexstr_to_value(value));
 	}
 
 	else if (strcmp(input, "MAR") == 0) {
@@ -620,7 +620,7 @@ int debugmenu_main(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty) {
 		else if (key == (int)'m' || key == (int)'M') {
 			baffa1_cpu.memory.debug_manual_offset = baffa1_cpu.memory.debug_manual_offset == 0x00 ? 0x01 : 0x00;
 
-			if (!get_byte_bit(baffa1_cpu.registers.MSWl.value(), MSWl_PAGING_EN))
+			if (!get_byte_bit(baffa1_cpu.alu.MSWl.value(), MSWl_PAGING_EN))
 				baffa1_cpu.memory.displayMainMemory(baffa1_cpu.registers, hw_tty);
 			else
 				baffa1_cpu.memory.display_test(baffa1_cpu.registers, hw_tty);

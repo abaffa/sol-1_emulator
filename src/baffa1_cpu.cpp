@@ -84,7 +84,7 @@ void BAFFA1_CPU::reset()
 	BAFFA1_REGISTERS::reset(this->registers.Bl, this->registers.Bh); // BX (16bit) Base		(Bh/Bl)
 	BAFFA1_REGISTERS::reset(this->registers.Cl, this->registers.Ch); // CX (16bit) Counter		(Ch/Cl)
 	BAFFA1_REGISTERS::reset(this->registers.Dl, this->registers.Dh); // DX (16bit) Data		(Dh/Dl)
-	BAFFA1_REGISTERS::reset(this->registers.Gl, this->registers.Gh); // GX (16bit)	Gh/Gl	General Register(For scratch)
+	BAFFA1_REGISTERS::reset(this->alu.Gl, this->alu.Gh); // GX (16bit)	Gh/Gl	General Register(For scratch)
 
 	//Pointer Registers
 	BAFFA1_REGISTERS::reset(this->registers.BPl, this->registers.BPh); // BP (16bit) Base Pointer  (Used to manage stack frames)
@@ -99,12 +99,10 @@ void BAFFA1_CPU::reset()
 	BAFFA1_REGISTERS::reset(this->registers.TDRl, this->registers.TDRh); // TDR (16bit) Temporary Data Register
 	this->registers.PTB.reset();  // PTB (8bit) = Page table base
 
-	BAFFA1_REGISTERS::reset(this->registers.MSWl, this->registers.MSWh); // 
+	BAFFA1_REGISTERS::reset(this->alu.MSWl, this->alu.MSWh); // 
 
 	BAFFA1_REGISTERS::reset(this->registers.MARl, this->registers.MARh); // 
 	BAFFA1_REGISTERS::reset(this->registers.MDRl, this->registers.MDRh); // 
-
-	//JumpZ80(z80, z80->registers.PC);
 
 	this->BKPT = 0xFFFF; // Breakpoint
 }
@@ -126,7 +124,7 @@ void BAFFA1_CPU::display_registers(HW_TTY& hw_tty) {
 	sprintf(str_out, "D=%04x", BAFFA1_REGISTERS::value(this->registers.Dl, this->registers.Dh)); hw_tty.print(str_out);
 	hw_tty.print(" | ");
 
-	sprintf(str_out, "G=%04x", BAFFA1_REGISTERS::value(this->registers.Gl, this->registers.Gh)); hw_tty.print(str_out);
+	sprintf(str_out, "G=%04x", BAFFA1_REGISTERS::value(this->alu.Gl, this->alu.Gh)); hw_tty.print(str_out);
 	hw_tty.print(" | ");
 	sprintf(str_out, "BP=%04x", BAFFA1_REGISTERS::value(this->registers.BPl, this->registers.BPh)); hw_tty.print(str_out);
 	hw_tty.print(" | ");
@@ -166,14 +164,14 @@ void BAFFA1_CPU::display_registers(HW_TTY& hw_tty) {
 	hw_tty.print("\n\n");
 
 	hw_tty.print("                              SPECIAL REGISTERS\n");
-	hw_tty.print(" *FLAGS="); print_byte_bin(str_out, this->registers.MSWh.value()); hw_tty.print(str_out); hw_tty.print(":"); this->registers.mswh_flags_desc(hw_tty);
+	hw_tty.print(" *FLAGS="); print_byte_bin(str_out, this->alu.MSWh.value()); hw_tty.print(str_out); hw_tty.print(":"); this->alu.mswh_flags_desc(hw_tty);
 	sprintf(str_out, " | IR=%02x", this->microcode.IR.value()); hw_tty.print(str_out);
 	sprintf(str_out, " | TDR=%04x", BAFFA1_REGISTERS::value(this->registers.TDRl, this->registers.TDRh)); hw_tty.print(str_out);
 	sprintf(str_out, " | PTB=%02x", this->registers.PTB.value()); hw_tty.print(str_out);
 	hw_tty.print("\n");
-	hw_tty.print(" *STATS="); print_byte_bin(str_out, this->registers.MSWl.value()); hw_tty.print(str_out);
+	hw_tty.print(" *STATS="); print_byte_bin(str_out, this->alu.MSWl.value()); hw_tty.print(str_out);
 	hw_tty.print(":       ");
-	this->registers.mswl_status_desc(hw_tty);
+	this->alu.mswl_status_desc(hw_tty);
 	hw_tty.print("\n\n");
 }
 
@@ -188,7 +186,7 @@ void BAFFA1_CPU::display_registers_lite(HW_TTY& hw_tty) {
 	hw_tty.print(" | ");
 	sprintf(str_out, "  D=%04x", BAFFA1_REGISTERS::value(this->registers.Dl, this->registers.Dh)); hw_tty.print(str_out);
 	hw_tty.print(" | ");
-	sprintf(str_out, "  G=%04x", BAFFA1_REGISTERS::value(this->registers.Gl, this->registers.Gh)); hw_tty.print(str_out);
+	sprintf(str_out, "  G=%04x", BAFFA1_REGISTERS::value(this->alu.Gl, this->alu.Gh)); hw_tty.print(str_out);
 	hw_tty.print("\n");
 
 	sprintf(str_out, "*  SI=%04x", BAFFA1_REGISTERS::value(this->registers.SIl, this->registers.SIh)); hw_tty.print(str_out);
@@ -237,13 +235,13 @@ void BAFFA1_CPU::display_registers_lite(HW_TTY& hw_tty) {
 	sprintf(str_out, "SSP=%04x", BAFFA1_REGISTERS::value(this->registers.SSPl, this->registers.SSPh)); hw_tty.print(str_out);
 	hw_tty.print("\n");
 
-	sprintf(str_out, "* FLAGS="); print_byte_bin(str_out + strlen(str_out), this->registers.MSWh.value()); hw_tty.print(str_out);
+	sprintf(str_out, "* FLAGS="); print_byte_bin(str_out + strlen(str_out), this->alu.MSWh.value()); hw_tty.print(str_out);
 	hw_tty.print("   | ");
-	sprintf(str_out, "STATUS="); print_byte_bin(str_out + strlen(str_out), this->registers.MSWl.value()); hw_tty.print(str_out);
+	sprintf(str_out, "STATUS="); print_byte_bin(str_out + strlen(str_out), this->alu.MSWl.value()); hw_tty.print(str_out);
 	hw_tty.print("\n");
 	sprintf(str_out, "* IR: %02x\n", this->microcode.IR.value());
-	hw_tty.print("Flags: "); this->registers.mswh_flags_desc(hw_tty); hw_tty.print("\n");
-	hw_tty.print("Status: "); this->registers.mswl_status_desc(hw_tty); hw_tty.print("\n");
+	hw_tty.print("Flags: "); this->alu.mswh_flags_desc(hw_tty); hw_tty.print("\n");
+	hw_tty.print("Status: "); this->alu.mswl_status_desc(hw_tty); hw_tty.print("\n");
 }
 
 
@@ -309,7 +307,7 @@ void  BAFFA1_CPU::memory_display(HW_TTY& hw_tty)
 
 Memory BAFFA1_CPU::get_current_memory() {
 	Memory memory;
-	if (!get_byte_bit(this->registers.MSWl.value(), MSWl_PAGING_EN))
+	if (!get_byte_bit(this->alu.MSWl.value(), MSWl_PAGING_EN))
 		memory = this->memory.rom_bios;
 
 	else
@@ -322,7 +320,7 @@ Memory BAFFA1_CPU::get_current_memory() {
 
 unsigned int BAFFA1_CPU::get_current_memory_size() {
 
-	if (!get_byte_bit(this->registers.MSWl.value(), MSWl_PAGING_EN))
+	if (!get_byte_bit(this->alu.MSWl.value(), MSWl_PAGING_EN))
 		return  this->memory.rom_bios.size;
 
 	else

@@ -15,32 +15,25 @@
 //
 ////// END LICENSE NOTICE//////
 //
-#ifndef BAFFA1BUS_H
-#define BAFFA1BUS_H
+#ifndef BAFFA1REGISTERS_BUS_H
+#define BAFFA1REGISTERS_BUS_H
 #include "config.h"
-#include "baffa1_registers.h"
-#include "baffa1_alu_board.h"
-#include "baffa1_alu_bus.h"
 #include "hw_tty.h"
 
-class BAFFA1_BUS {
-	
+class BAFFA1_REGISTERS_BUS {
+
 public:
-	BAFFA1_BYTE data_bus;
 
-	//BAFFA1_BYTE k_bus; // input pra alu k -> y
-	//BAFFA1_BYTE w_bus; // input pra alu w -> x
-	
-	//BAFFA1_ALU_BUS alu_bus;
-
-	/////
-	BAFFA1_BYTE bus_tristate(BAFFA1_ALU& baffa1_alu);
-	BAFFA1_BYTE bus_rd(BAFFA1_ALU& baffa1_alu, BAFFA1_BYTE rd, BAFFA1_BYTE panel_rd);
-	BAFFA1_BYTE bus_wr(BAFFA1_ALU& baffa1_alu, BAFFA1_BYTE wr, BAFFA1_BYTE panel_wr);
-	BAFFA1_BYTE bus_mem_io(BAFFA1_ALU& baffa1_alu, BAFFA1_BYTE mem_io, BAFFA1_BYTE panel_mem_io);
-	/////
+	BAFFA1_BYTE k_bus; // input pra alu k -> y
+	BAFFA1_BYTE w_bus; // input pra alu w -> x
 
 	void init();
 	void reset();
+
+	//BAFFA1_BYTE k_bus_refresh(BAFFA1_REGISTERS& baffa1_registers, BAFFA1_BYTE alu_b_src);
+
+
+
+
 };
 #endif

@@ -526,17 +526,17 @@ int main(int argc, char** argv) {
 
 
 
-			long  address_bus = baffa1_computer.cpu.memory.read_address_bus(baffa1_computer.bus.bus_tristate(baffa1_computer.cpu.registers), baffa1_computer.cpu.microcode, baffa1_computer.cpu.registers);
+			long  address_bus = baffa1_computer.cpu.memory.read_address_bus(baffa1_computer.bus.bus_tristate(baffa1_computer.cpu.alu), baffa1_computer.cpu.microcode,baffa1_computer.cpu.alu, baffa1_computer.cpu.registers);
 			BAFFA1_BYTE data_bus = baffa1_computer.bus.data_bus;
 			BAFFA1_BYTE ir = baffa1_computer.cpu.microcode.IR.value();
-			BAFFA1_BYTE w = baffa1_computer.bus.w_bus;
+			BAFFA1_BYTE w = baffa1_computer.cpu.registers.registers_bus.w_bus;
 
 
 			BAFFA1_BYTE marl = baffa1_computer.cpu.registers.MARl.value();
 			BAFFA1_BYTE marh = baffa1_computer.cpu.registers.MARh.value();
 
-			BAFFA1_BYTE flags = baffa1_computer.cpu.registers.MSWh.value();
-			BAFFA1_BYTE status = baffa1_computer.cpu.registers.MSWl.value();
+			BAFFA1_BYTE flags = baffa1_computer.cpu.alu.MSWh.value();
+			BAFFA1_BYTE status = baffa1_computer.cpu.alu.MSWl.value();
 
 			BAFFA1_BYTE int_status = baffa1_computer.cpu.microcode.controller_bus.int_status;
 
@@ -715,7 +715,7 @@ int main(int argc, char** argv) {
 			SDL_RenderPresent(renderer);
 
 
-			if (baffa1_computer.bus.bus_tristate(baffa1_computer.cpu.registers) != 0x00) {
+			if (baffa1_computer.bus.bus_tristate(baffa1_computer.cpu.alu) != 0x00) {
 				baffa1_computer.bus.data_bus = baffa1_computer.cpu.microcode.controller_bus.panel_data;
 
 
