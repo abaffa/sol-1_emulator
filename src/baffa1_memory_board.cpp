@@ -212,13 +212,16 @@ BAFFA1_BYTE BAFFA1_MEMORY::page_table_addr_src(BAFFA1_BYTE force_user_ptb, BAFFA
 	return get_byte_bit(force_user_ptb, 0) | get_byte_bit(reg_status_value, MSWl_CPU_MODE);
 }
 
-void BAFFA1_MEMORY::refresh_pagetable_mem(BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers) {
+void BAFFA1_MEMORY::refresh_pagetable_mem(BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers, BAFFA1_CONFIG& config, FILE *fa) {
+
+	
+	if (microcode.controller_bus.ptb_wrt == 0x00) { this->PTB.set(alu.alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"PTB", alu.alu_bus.z_bus); } }
 
 	if (microcode.controller_bus.pagtbl_ram_we && microcode.controller_bus.mdr_to_pagtbl_en)
 	{
 		BAFFA1_MWORD ptb_mem_addr = 0;
 		
-		if (page_table_addr_src(microcode.controller_bus.force_user_ptb, alu.MSWl.value())) ptb_mem_addr = registers.PTB.value();
+		if (page_table_addr_src(microcode.controller_bus.force_user_ptb, alu.MSWl.value())) ptb_mem_addr = PTB.value();
 		
 		unsigned long pagtbl_ram_addr = 0;
 		pagtbl_ram_addr = (unsigned long)((registers.MARh.value() >> 3) & 0b00011111);
@@ -248,7 +251,7 @@ unsigned long BAFFA1_MEMORY::read_address_bus(BAFFA1_BYTE bus_tristate, BAFFA1_M
 
 				BAFFA1_MWORD ptb_mem_addr = 0; // ((registers.MARh.value() >> 3) & 0b00011111);
 
-				if (page_table_addr_src(microcode.controller_bus.force_user_ptb, alu.MSWl.value())) ptb_mem_addr = (unsigned long)(registers.PTB.value());
+				if (page_table_addr_src(microcode.controller_bus.force_user_ptb, alu.MSWl.value())) ptb_mem_addr = (unsigned long)(PTB.value());
 
 				unsigned long pagtbl_ram_addr = 0;
 				pagtbl_ram_addr = (unsigned long)((registers.MARh.value() >> 3) & 0b00011111);

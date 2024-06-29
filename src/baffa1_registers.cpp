@@ -160,15 +160,6 @@ void BAFFA1_REGISTERS::refresh(struct baffa1_controller_rom *controller_bus, BAF
 		}
 	}
 
-
-
-
-
-
-
-
-	// deve ser lá na memoria
-	if (controller_bus->ptb_wrt == 0x00) { this->PTB.set(alu_bus.z_bus); if (config.DEBUG_TRACE_WRREG) { reg8bit_print(fa, (char*)"WRITE", (char*)"PTB", alu_bus.z_bus); } }
 }
 
 
@@ -196,6 +187,8 @@ BAFFA1_BYTE BAFFA1_REGISTERS::w_bus_refresh(
 	BAFFA1_BYTE selRegCol = 0x00;
 	BAFFA1_BYTE selRegRow = 0x00;
 
+
+	//REGISTER SELECTION - que está na placa ALU e deveria estar aqui
 	// Seleciona registro pelo barramento
 	if ((bus_tristate == 0x00) & (display_reg_load == 0x00)) {
 		selRegCol = alu_a_src & 0b00000111;

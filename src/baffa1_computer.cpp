@@ -761,7 +761,7 @@ void BAFFA1_COMPUTER::clock_low() {
 	//if (this->cpu.microcode.controller_bus.ir_wrt == 0x00) this->cpu.microcode.IR.set(this->bus.data_bus);
 	//this->cpu.alu.refresh(&this->cpu.microcode.controller_bus, this->cpu.alu.alu_bus, this->bus.data_bus, this->cpu.alu.u_sf, this->cpu.config, fa);
 	this->cpu.registers.refresh(&this->cpu.microcode.controller_bus, this->cpu.alu, this->cpu.alu.alu_bus, this->bus.data_bus, this->cpu.alu.u_sf, this->cpu.config, fa);
-	this->cpu.memory.refresh_pagetable_mem(this->cpu.microcode, this->cpu.alu, this->cpu.registers);	// PAGETABLE 	
+	this->cpu.memory.refresh_pagetable_mem(this->cpu.microcode, this->cpu.alu, this->cpu.registers, this->cpu.config, fa);	// PAGETABLE 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////////////

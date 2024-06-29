@@ -419,13 +419,13 @@ void debugmenu_main_edit_register(BAFFA1_CPU& baffa1_cpu, HW_TTY& hw_tty) {
 
 	}
 	else if (strcmp(input, "PTB") == 0) {
-		sprintf(str_out, " | PTB=%02x | Data? ", baffa1_cpu.registers.PTB.value());
+		sprintf(str_out, " | PTB=%02x | Data? ", baffa1_cpu.memory.PTB.value());
 		input = hw_tty.gets(2);
 
 		if (strlen(input) == 0) { hw_tty.print("\n");  return; }
 
 		leftpad(input, value, 2);
-		baffa1_cpu.registers.PTB.set(convert_hexstr_to_value(value));
+		baffa1_cpu.memory.PTB.set(convert_hexstr_to_value(value));
 	}
 	else if (strcmp(input, "MSW") == 0) {
 		sprintf(str_out, " | MSW=%04x | Data? ", BAFFA1_REGISTERS::value(baffa1_cpu.alu.MSWl, baffa1_cpu.alu.MSWh)); hw_tty.print(str_out);

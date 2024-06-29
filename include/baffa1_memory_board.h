@@ -28,6 +28,10 @@
 class BAFFA1_MEMORY
 {
 public:
+	
+	
+	BAFFA1_REGISTER_8BIT PTB;  // PTB (8bit) = Page table base
+
 	Memory rom_bios;
 
 	Memory pagtbl_ram_l;
@@ -65,7 +69,7 @@ public:
 	unsigned long read_address_bus(BAFFA1_BYTE bus_tristate, BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers);
 	BAFFA1_BYTE read_memory(BAFFA1_MWORD addr, BAFFA1_BYTE buffer_mem_io, BAFFA1_BYTE buffer_rd);
 	void write_memory(BAFFA1_MWORD addr, BAFFA1_BYTE value, BAFFA1_BYTE buffer_mem_io, BAFFA1_BYTE buffer_wr);
-	void refresh_pagetable_mem(BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers);
+	void refresh_pagetable_mem(BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers, BAFFA1_CONFIG& config, FILE *fa);
 
 	void refresh_int_pending(BAFFA1_MICROCODE& microcode, BAFFA1_ALU& alu, BAFFA1_REGISTERS& registers);
 	void refresh_any_interruption(BAFFA1_MICROCODE& microcode);

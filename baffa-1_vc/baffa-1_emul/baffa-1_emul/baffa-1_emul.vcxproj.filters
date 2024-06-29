@@ -37,9 +37,6 @@
     <Filter Include="Header Files\peripheral">
       <UniqueIdentifier>{212998f4-5bfd-4a1c-9495-4a11bdea9be8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\peripheral">
-      <UniqueIdentifier>{a3d342a3-004e-4ee9-bf6a-820fa234d076}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\memory">
       <UniqueIdentifier>{16d763e8-c5ad-4bd6-b725-bfa1a6bafb23}</UniqueIdentifier>
     </Filter>
@@ -58,6 +55,9 @@
     <Filter Include="Source Files\registers">
       <UniqueIdentifier>{a34481b4-2151-41ee-b7af-9ca2ed55cc6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\peripheral">
+      <UniqueIdentifier>{a3d342a3-004e-4ee9-bf6a-820fa234d076}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
@@ -69,19 +69,10 @@
     <ClCompile Include="..\..\..\src\debugmenu_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\baffa1_rom.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\debugmenu_roms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\baffa1_register_8bit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\baffa1_registers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\queue_ll.cpp">
@@ -123,9 +114,6 @@
     <ClCompile Include="..\..\..\src\memory.cpp">
       <Filter>Source Files\memory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\baffa1_memory_board.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\baffa1_microcode.cpp">
       <Filter>Source Files\microcode</Filter>
     </ClCompile>
@@ -135,12 +123,21 @@
     <ClCompile Include="..\..\..\src\baffa1_alu_bus.cpp">
       <Filter>Source Files\alu</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\baffa1_register_8bit.cpp">
+      <Filter>Source Files\registers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\baffa1_registers.cpp">
+      <Filter>Source Files\registers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\baffa1_memory_board.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\baffa1_rom.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\baffa1_registers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\baffa1_cpu.h">
@@ -155,13 +152,7 @@
     <ClInclude Include="..\..\..\include\console_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\baffa1_rom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\debugmenu_roms.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\baffa1_register_8bit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\queue_ll.h">
@@ -434,9 +425,6 @@
     <ClInclude Include="..\..\..\include\hw_web.h">
       <Filter>Header Files\peripheral</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\baffa1_memory_board.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\memory.h">
       <Filter>Header Files\memory</Filter>
     </ClInclude>
@@ -457,6 +445,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\baffa1_registers_bus.cpp">
       <Filter>Source Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\baffa1_register_8bit.h">
+      <Filter>Header Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\baffa1_registers.h">
+      <Filter>Header Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\baffa1_memory_board.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\baffa1_rom.h">
+      <Filter>Header Files\memory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

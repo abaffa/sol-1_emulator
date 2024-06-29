@@ -64,14 +64,12 @@ public:
 
 	BAFFA1_REGISTER_8BIT TDRh; // TDR (16bit) Temporary Data Register
 	BAFFA1_REGISTER_8BIT TDRl;
-	BAFFA1_REGISTER_8BIT PTB;  // PTB (8bit) = Page table base
-
-
 
 
 	BAFFA1_REGISTER_8BIT INT_MASKS; // INT FLAGS
 	
 
+//	BAFFA1_REGISTER_8BIT PTB;  // PTB (8bit) = Page table base
 
 	BAFFA1_REGISTER_8BIT MARh; // memory address register
 	BAFFA1_REGISTER_8BIT MARl;

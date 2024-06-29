@@ -97,7 +97,7 @@ void BAFFA1_CPU::reset()
 	BAFFA1_REGISTERS::reset(this->registers.PCl, this->registers.PCh); // PC (16bit) Program Counter
 
 	BAFFA1_REGISTERS::reset(this->registers.TDRl, this->registers.TDRh); // TDR (16bit) Temporary Data Register
-	this->registers.PTB.reset();  // PTB (8bit) = Page table base
+	this->memory.PTB.reset();  // PTB (8bit) = Page table base
 
 	BAFFA1_REGISTERS::reset(this->alu.MSWl, this->alu.MSWh); // 
 
@@ -167,7 +167,7 @@ void BAFFA1_CPU::display_registers(HW_TTY& hw_tty) {
 	hw_tty.print(" *FLAGS="); print_byte_bin(str_out, this->alu.MSWh.value()); hw_tty.print(str_out); hw_tty.print(":"); this->alu.mswh_flags_desc(hw_tty);
 	sprintf(str_out, " | IR=%02x", this->microcode.IR.value()); hw_tty.print(str_out);
 	sprintf(str_out, " | TDR=%04x", BAFFA1_REGISTERS::value(this->registers.TDRl, this->registers.TDRh)); hw_tty.print(str_out);
-	sprintf(str_out, " | PTB=%02x", this->registers.PTB.value()); hw_tty.print(str_out);
+	sprintf(str_out, " | PTB=%02x", this->memory.PTB.value()); hw_tty.print(str_out);
 	hw_tty.print("\n");
 	hw_tty.print(" *STATS="); print_byte_bin(str_out, this->alu.MSWl.value()); hw_tty.print(str_out);
 	hw_tty.print(":       ");
@@ -225,7 +225,7 @@ void BAFFA1_CPU::display_registers_lite(HW_TTY& hw_tty) {
 	hw_tty.print(" | ");
 	sprintf(str_out, "TDR=%04x", BAFFA1_REGISTERS::value(this->registers.TDRl, this->registers.TDRh)); hw_tty.print(str_out);
 	hw_tty.print(" | ");
-	sprintf(str_out, "PTB=%02x", this->registers.PTB.value()); hw_tty.print(str_out);
+	sprintf(str_out, "PTB=%02x", this->memory.PTB.value()); hw_tty.print(str_out);
 	hw_tty.print("\n");
 
 	sprintf(str_out, "*  BP=%04x", BAFFA1_REGISTERS::value(this->registers.BPl, this->registers.BPh)); hw_tty.print(str_out);
