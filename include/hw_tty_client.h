@@ -20,14 +20,15 @@
 #include "config.h"
 #include <queue>
 
-#if defined(__linux__) || defined(__MINGW32__)
+#if defined(__linux__)
 #include <sys/socket.h>
 #include <fcntl.h>
-#else
 
+#else // || defined(__MINGW32__)
 #include <mutex> 
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <condition_variable>
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -43,23 +44,92 @@ class HW_TTY_CLIENT {
 public:
 	int running;
 	int index;
-#ifdef _MSC_VER    
-	SOCKET *client;
+#if defined(_MSC_VER) || defined(__MINGW32__)    
+	SOCKET client;
 	mutex mtx_out;
 	condition_variable cv_out;
 
 #else
-	int *client;
+	int client;
 	pthread_mutex_t mtx_out;
 #endif
-	struct hw_uart* hw_uart;
+	hw_uart* _hw_uart;
 	queue<BAFFA1_BYTE> tty_out;
 	queue<BAFFA1_BYTE>* tty_in;
 	BAFFA1_BYTE* console;
 	BAFFA1_BYTE* debug_call;
 
+	uint8_t user_validated;
+
+	//used during transmission
+	char lastSentChar;
+
+	//used during reception
+	int receiv_total;
+	int proc_receiv_count;
+	uint8_t receivedCR;
+
+	//used during IAC Commands - Telnet Protocol
+
+	bool handleTelnetProtocol;
+	bool subnegotiation;
+	char telnetTerminalType[100];
+	bool telnetDisableLocalEcho;
+	int cmdLen;
+	uint8_t cmd[4];
+
+	char passBuffer[21];
+
+
+	void reset() {
+
+		running = 0;
+		//index = -1;
+
+		//_hw_uart = NULL;
+		queue<BAFFA1_BYTE> empty; 	std::swap(tty_out, empty);
+		//tty_in = NULL;
+		//console = NULL;
+		//debug_call = NULL;
+
+		user_validated = 0;
+
+		//used during transmission
+		lastSentChar = '\0';
+
+		//used during reception
+		receiv_total = 0;
+		proc_receiv_count = 0;
+		receivedCR = 0x0;
+
+		//used during IAC Commands - Telnet Protocol
+
+		handleTelnetProtocol = false;
+		subnegotiation = false;
+		strcpy(telnetTerminalType, "vt100");
+		telnetDisableLocalEcho = true;
+		cmdLen = 0;
+		cmd[0] = 0;		cmd[1] = 0;		cmd[2] = 0;		cmd[3] = 0;
+		passBuffer[0] = '\0';
+	}
+
 	HW_TTY_CLIENT() {
+		this->reset();
+
+		index = -1;
+
+		_hw_uart = NULL;
+
 		tty_in = NULL;
+		console = NULL;
+		debug_call = NULL;
+
+#if defined(_MSC_VER) || defined(__MINGW32__)    
+		client = -1;
+#else
+		client = -1;
+#endif
+
 	}
 };
 

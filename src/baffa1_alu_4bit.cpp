@@ -87,17 +87,7 @@ static BAFFA1_BYTE IC74LSL181(BAFFA1_BYTE nA, BAFFA1_BYTE nB, BAFFA1_BYTE S, BAF
 
 static void baffa1_alu_4bit_reset(struct baffa1_alu_4bit *alu) {
 
-	//alu->_A = 0x00;
-	//alu->_B = 0x00;
-	//alu->_C = 0x00;
-
-	//alu->A = 0x00;
-	//alu->B = 0x00;
-
-	//alu->C = 0x00;
 	alu->alu_output = 0x00;
-
-	//alu->CIN = 0x00; //carry in
 
 	alu->COUT = 0x00; //carry in
 

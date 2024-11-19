@@ -19,7 +19,7 @@
 #include "baffa1_computer.h"
 #include <stdio.h>
 
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 #include <windows.h>
 #else
 #include <pthread.h> 
@@ -118,7 +118,7 @@ void HW_WEB::new_char(BAFFA1_BYTE c) {
 }
 
 /*
-void HW_WEB::init(BAFFA1_CPU& baffa1_cpu, struct hw_uart* hw_uart) {
+void HW_WEB::init(BAFFA1_CPU& baffa1_cpu, hw_uart* hw_uart) {
 	int i;
 
 	for (i = 0; i < 10; i++) {
@@ -136,7 +136,7 @@ void HW_WEB::init(BAFFA1_CPU& baffa1_cpu, struct hw_uart* hw_uart) {
 
 
 
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 DWORD WINAPI WebClientThread(LPVOID pParam)
 #else
 void *WebClientThread(void *pParam)
@@ -154,7 +154,7 @@ void *WebClientThread(void *pParam)
 	BAFFA1_BYTE lastchar = 0;
 	BAFFA1_BYTE startCMD = 0x00;
 
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 	SOCKET client = *(new_web_client.client);
 #else
 	int client = *(new_web_client.client);
@@ -207,10 +207,10 @@ void *WebClientThread(void *pParam)
 						const char *ccc = str3.c_str();
 
 						for (i = 0; i < lll; i++) {
-							new_web_client.hw_uart->receive(ccc[i]);
+							new_web_client._hw_uart->receive(ccc[i]);
 						}
 
-						new_web_client.hw_uart->receive('\r');
+						new_web_client._hw_uart->receive('\r');
 					}
 				}
 
@@ -252,7 +252,7 @@ void *WebClientThread(void *pParam)
 			send(client, cur_response.c_str(), (int)cur_response.length(), 0);
 			//Content - Length: 12\r\n
 
-#ifdef _MSC_VER     
+#if defined(_MSC_VER) || defined(__MINGW32__)     
 			Sleep(1000);
 #else
 			int milliseconds = 1000;
@@ -269,7 +269,7 @@ void *WebClientThread(void *pParam)
 
 	}
 
-#ifdef _MSC_VER     
+#if defined(_MSC_VER) || defined(__MINGW32__)     
 	closesocket(client);
 #else
 	shutdown(client, 2);
@@ -282,7 +282,7 @@ void *WebClientThread(void *pParam)
 }
 
 
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 DWORD WINAPI WebServerThread(LPVOID pParam)
 #else
 void *WebServerThread(void *pParam)
@@ -291,7 +291,7 @@ void *WebServerThread(void *pParam)
 
 	struct hw_web_client* clients = (struct hw_web_client*)pParam;
 	sockaddr_in local;
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 	SOCKET server;
 	WSADATA wsaData;
 	int wsaret = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -307,7 +307,7 @@ void *WebServerThread(void *pParam)
 	local.sin_addr.s_addr = INADDR_ANY;
 	local.sin_port = htons((u_short)20280);
 
-#ifdef _MSC_VER   
+#if defined(_MSC_VER) || defined(__MINGW32__)   
 	server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (server == INVALID_SOCKET)
 	{
@@ -330,7 +330,7 @@ void *WebServerThread(void *pParam)
 
 
 	sockaddr_in from;
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 	SOCKET client;
 	int fromlen = sizeof(from);
 #else
@@ -360,7 +360,7 @@ void *WebServerThread(void *pParam)
 			}
 		}
 		if (new_web_client != NULL) {
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)    
 			DWORD tid = 100 + new_web_client->index;
 			HANDLE myHandle = CreateThread(0, 0, WebClientThread, new_web_client, 0, &tid);
 #else
@@ -372,7 +372,7 @@ void *WebServerThread(void *pParam)
 
 			char *buf_send = (char*)"No pool available.\n";
 			send(client, buf_send, (int)strlen(buf_send), 0);
-#ifdef _MSC_VER     
+#if defined(_MSC_VER) || defined(__MINGW32__)     
 			closesocket(client);
 #else
 			shutdown(client, 2);
@@ -385,7 +385,7 @@ void *WebServerThread(void *pParam)
 
 
 
-void HW_WEB::start_server(BAFFA1_CPU& baffa1_cpu, struct hw_uart* hw_uart) {
+void HW_WEB::start_server(BAFFA1_CPU& baffa1_cpu, hw_uart* hw_uart) {
 
 	int i;
 
@@ -394,11 +394,11 @@ void HW_WEB::start_server(BAFFA1_CPU& baffa1_cpu, struct hw_uart* hw_uart) {
 		this->clients[i].index = i;
 		this->clients[i].running = 0;
 		//this->clients[i].baffa1_cpu = baffa1_cpu;
-		this->clients[i].hw_uart = hw_uart;
+		this->clients[i]._hw_uart = hw_uart;
 		this->clients[i].web_out = queue_create();
 	}
 
-#ifdef _MSC_VER        
+#if defined(_MSC_VER) || defined(__MINGW32__)
 	DWORD tid;
 	HANDLE myHandle = CreateThread(0, 0, WebServerThread, &this->clients, 0, &tid);
 #else

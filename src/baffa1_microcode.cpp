@@ -152,57 +152,43 @@ void BAFFA1_MICROCODE::init(HW_TTY& hw_tty) {
 	controller_bus.reset = 0x00;
 	controller_bus.restart = 0x00;
 
+	///
+
+	controller_bus.mux = 0x00 ;
+	controller_bus.any_interruption = 0x00;
+	controller_bus.int_pending = 0x00;
+	///
+
 
 	this->rom.init(hw_tty);
 }
 
 
-
-
-
-BAFFA1_BYTE BAFFA1_MICROCODE::int_pending(BAFFA1_BYTE reg_status_value) {
-	return get_byte_bit(controller_bus.int_request, 0) & get_byte_bit(reg_status_value, MSWl_INTERRUPT_ENABLE);
+void BAFFA1_MICROCODE::refresh_int_pending(BAFFA1_BYTE reg_status_value) {
+	this->controller_bus.int_pending = get_byte_bit(controller_bus.int_request, 0) & get_byte_bit(reg_status_value, MSWl_INTERRUPT_ENABLE);
 }
 
-BAFFA1_BYTE BAFFA1_MICROCODE::any_interruption(BAFFA1_BYTE reg_status_value) {
-	return get_byte_bit(int_pending(reg_status_value), 0) | get_byte_bit(controller_bus.dma_req, 0);
+void BAFFA1_MICROCODE::refresh_any_interruption(BAFFA1_BYTE reg_status_value) {
+
+	refresh_int_pending(reg_status_value);
+	this->controller_bus.any_interruption = get_byte_bit(controller_bus.int_pending, 0) | get_byte_bit(controller_bus.dma_req, 0);
 }
 
-BAFFA1_BYTE BAFFA1_MICROCODE::page_table_addr_src(BAFFA1_BYTE reg_status_value) {
-	return get_byte_bit(controller_bus.force_user_ptb, 0) ^ get_byte_bit(reg_status_value, MSWl_CPU_MODE);
-}
+void BAFFA1_MICROCODE::refresh_MUX(BAFFA1_BYTE reg_status_value) {
 
+	refresh_any_interruption(reg_status_value);
 
-BAFFA1_BYTE BAFFA1_MICROCODE::MUX(BAFFA1_BYTE reg_status_value) {
-
-	BAFFA1_BYTE mux_A = (controller_bus.next == 0b00000011) || (controller_bus.next == 0b00000010 && any_interruption(reg_status_value) == 0x01);
+	BAFFA1_BYTE mux_A = (controller_bus.next == 0b00000011) || (controller_bus.next == 0b00000010 && this->controller_bus.any_interruption == 0x01);
 	BAFFA1_BYTE mux_B = controller_bus.next == 0b00000010;
 
-	BAFFA1_BYTE mux = set_byte_bit(mux_B, 1) | set_byte_bit(mux_A, 0);
-
-	return mux;
+	this->controller_bus.mux = set_byte_bit(mux_B, 1) | set_byte_bit(mux_A, 0);
 }
 
 
-void BAFFA1_MICROCODE::display_u_adder(BAFFA1_BYTE typ, BAFFA1_BYTE final_condition, HW_TTY& hw_tty) {
 
-	char str_out[255];
-	hw_tty.print("* next(typ): "); print_nibble_bin(str_out, typ); hw_tty.print(str_out);
-	hw_tty.print(" | ");
-	hw_tty.print(" u_offset: "); print_byte_bin(str_out, controller_bus.u_offset); hw_tty.print(str_out);
-	hw_tty.print(" | ");
-	hw_tty.print("Final Condition : "); print_nibble_bin(str_out, final_condition); hw_tty.print(str_out);
-	hw_tty.print("\n");
 
-	hw_tty.print("* A(u_ad): ");  print_word_bin_nibbles(str_out, this->u_ad_bus); hw_tty.print(str_out);
-	hw_tty.print("\n");
-	hw_tty.print("* B: ");  print_word_bin_nibbles(str_out, this->u_adder_b); hw_tty.print(str_out);
-	hw_tty.print("\n");
-	hw_tty.print("* u_adder: ");  print_word_bin(str_out, this->u_adder); hw_tty.print(str_out);
-	hw_tty.print("\n");
-}
-
-BAFFA1_DWORD BAFFA1_MICROCODE::u_adder_refresh(BAFFA1_BYTE typ, BAFFA1_BYTE final_condition, BAFFA1_CONFIG& config, HW_TTY& hw_tty) {
+// add number to internal opcode cycle address
+void BAFFA1_MICROCODE::u_adder_refresh() {
 
 	//if type = branch, and condition = false, then next = +1
 
@@ -211,35 +197,25 @@ BAFFA1_DWORD BAFFA1_MICROCODE::u_adder_refresh(BAFFA1_BYTE typ, BAFFA1_BYTE fina
 	//0    1		branch
 	//1    0		pre-fetch
 	//1    1		post_fetch
+	BAFFA1_BYTE typ = controller_bus.next;
+
+	BAFFA1_BYTE final_condition = controller_bus.final_condition;
 
 	BAFFA1_BYTE u_offset6 = get_byte_bit(controller_bus.u_offset, 6);
 
-	if (typ == 0b00000001 && !check_byte_bit(final_condition, 0))
+	bool selA = typ == 0b00000001 && !get_byte_bit(final_condition, 0);
+
+	if (selA)
 		this->u_adder_b = 0x01;
-	else
-		this->u_adder_b = controller_bus.u_offset |
-		set_word_bit(u_offset6, 7) |
-		set_word_bit(u_offset6, 8) |
-		set_word_bit(u_offset6, 9) |
-		set_word_bit(u_offset6, 10) |
-		set_word_bit(u_offset6, 11) |
-		set_word_bit(u_offset6, 12) |
-		set_word_bit(u_offset6, 13);
-
-	this->u_adder = (this->u_ad_bus & 0b0011111111111111) + this->u_adder_b;
-
-	if (config.DEBUG_UADDER) {
-		hw_tty.print("***** U_ADDER\n");
-		display_u_adder(controller_bus.next, controller_bus.final_condition, hw_tty);
-		hw_tty.print("\n");
+	else {
+		this->u_adder_b = controller_bus.u_offset;
+		if (u_offset6) this->u_adder_b |= 0b11111110000000;
 	}
-
-	return this->u_adder;
+	this->u_adder = (this->u_ad_bus & 0b0011111111111111) + this->u_adder_b;
 }
 
-
 // Sets u-address
-void BAFFA1_MICROCODE::addresser(BAFFA1_BYTE reg_status_value, BAFFA1_CONFIG& config, HW_TTY& hw_tty) {
+void BAFFA1_MICROCODE::addresser(BAFFA1_BYTE reg_status_value) {
 
 	////////////////////////////////////////////////////////////////////////////
 	//IC15 //IC59 //IC153 //IC167 //IC61 //IC12 //IC341 //IC175
@@ -272,93 +248,44 @@ void BAFFA1_MICROCODE::addresser(BAFFA1_BYTE reg_status_value, BAFFA1_CONFIG& co
 	BAFFA1_DWORD u_fetch = 0x10;
 	BAFFA1_DWORD u_trap = 0x20;
 
-	BAFFA1_BYTE mux = MUX(reg_status_value);
-
-
 	BAFFA1_DWORD u_address_mux_l = 0x00;
 	BAFFA1_DWORD u_address_mux_h = 0x00;
 
-	if (mux == 0x00) {
+	refresh_MUX(reg_status_value);
+
+	// set Opcode/cycle Rom Address
+	if (this->controller_bus.mux == 0x00) { // from Adder
 		u_address_mux_l = this->u_adder & 0b00000011111111;
 		u_address_mux_h = (this->u_adder & 0b11111100000000) >> 8;
 	}
-	else if (mux == 0x01) {
-		u_address_mux_l = (get_byte_bit(controller_bus.u_escape_0, 0) << 4) | (get_byte_bit(controller_bus.u_escape_1, 0) << 5) | ((this->IR.value() & 0b00000011) << 6);
+	else if (this->controller_bus.mux == 0x01) { //from IR  + Escape (if activated)
+		// U_ESCAPE_1 não está ligado no SOL-1
+		u_address_mux_l = (get_byte_bit(controller_bus.u_escape_0, 0) << 4) | ((this->IR.value() & 0b00000011) << 6);
+
+		//u_address_mux_l = (get_byte_bit(controller_bus.u_escape_0, 0) << 4) | (get_byte_bit(controller_bus.u_escape_1, 0) << 5) | ((this->IR.value() & 0b00000011) << 6);
 		u_address_mux_h = ((this->IR.value() & 0b11111100) >> 2);
 	}
-	else if (mux == 0x02) {
+	else if (this->controller_bus.mux == 0x02) { // force FETCH
 		u_address_mux_l = u_fetch & 0b00000011111111;
 		u_address_mux_h = (u_fetch & 0b11111100000000) >> 8;
 	}
-	else if (mux == 0x03) {
+	else if (this->controller_bus.mux == 0x03) { // force TRAP
 		u_address_mux_l = u_trap & 0b00000011111111;
 		u_address_mux_h = (u_trap & 0b11111100000000) >> 8;
 	}
 
 
-	BAFFA1_DWORD u_address = (((BAFFA1_DWORD)u_address_mux_h) << 8) | u_address_mux_l;
-	BAFFA1_REGISTERS::set(this->U_ADDRESSl, this->U_ADDRESSh, u_address);
+	BAFFA1_DWORD u_address = (((BAFFA1_DWORD)u_address_mux_h) << 8) | u_address_mux_l; // Opcode/cycle Rom Address
+	BAFFA1_REGISTERS::set(this->U_ADDRESSl, this->U_ADDRESSh, u_address); // U-Address Register
 
-	this->old_u_ad_bus = this->u_ad_bus;
+	this->old_u_ad_bus = this->u_ad_bus; // define old state for debuging
 
-	if (controller_bus.reset == 0x00) 
+	if (controller_bus.reset == 0x00) // reset address - button reset
 		this->u_ad_bus = u_address;
 	else
 		this->u_ad_bus = 0;
 
-
-
-
-	if (config.DEBUG_UADDRESSER) {
-		char str_out[255];
-		hw_tty.print("***** U_ADDRESSER\n");
-		hw_tty.print("* Next(typ): "); print_nibble_bin(str_out, controller_bus.next); hw_tty.print(str_out);
-		hw_tty.print(" | Any Interruption: "); print_nibble_bin(str_out, any_interruption(reg_status_value)); hw_tty.print(str_out);
-		//hw_tty.print(" | Mux_B: "); print_nibble_bin(str_out, mux_B); hw_tty.print(str_out);
-		//hw_tty.print(" | Mux_A: "); print_nibble_bin(str_out, mux_A); hw_tty.print(str_out);
-		hw_tty.print("\n");
-
-		/*
-		hw_tty.print("* "); print_byte_bin(str_out, in01_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in01_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res01); hw_tty.print(str_out); hw_tty.print("\n");
-		hw_tty.print("* "); print_byte_bin(str_out, in02_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in02_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res02); hw_tty.print(str_out); hw_tty.print("\n");
-		hw_tty.print("* "); print_byte_bin(str_out, in03_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in03_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res03); hw_tty.print(str_out); hw_tty.print("\n");
-		hw_tty.print("* "); print_byte_bin(str_out, in04_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in04_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res04); hw_tty.print(str_out); hw_tty.print("\n");
-		hw_tty.print("* "); print_byte_bin(str_out, in05_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in05_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res05); hw_tty.print(str_out); hw_tty.print("\n");
-		hw_tty.print("* "); print_byte_bin(str_out, in06_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in06_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_binstr_out, res06); hw_tty.print(str_out); hw_tty.print("\n");
-		hw_tty.print("* "); print_byte_bin(str_out, in07_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in07_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res07); hw_tty.print(str_out); hw_tty.print("\n");
-		*/
-		sprintf(str_out, "* U_ADDRESS=%04x", BAFFA1_REGISTERS::value(this->U_ADDRESSl, this->U_ADDRESSh)); hw_tty.print(str_out);
-		hw_tty.print(" | ");
-		sprintf(str_out, "U_AD=%04x", this->u_ad_bus); hw_tty.print(str_out);
-		hw_tty.print(" | ");
-		hw_tty.print("Mux: "); print_nibble_bin(str_out, mux); hw_tty.print(str_out);
-		hw_tty.print("\n");
-
-		hw_tty.print("\n");
-	}
-
 	//return this->u_ad_bus;
-}
-
-// Sets Microcode
-void BAFFA1_MICROCODE::sequencer_update(BAFFA1_BYTE reg_status_value, BAFFA1_CONFIG& config, HW_TTY& hw_tty) {
-
-	//CLOCK LOW
-	this->addresser(reg_status_value, config, hw_tty); // Sets u-address
-
-	////////////////////////////////////////////////////////////////////////////
-
-	this->load_microcode_from_rom(); // Sets Microcode from Rom
-
-	if (config.DEBUG_MICROCODE) {
-		char str_out[255];
-		hw_tty.print("***** MICROCODE\n");
-		//hw_tty.print("U-ADDRESS: ");  print_word_bin(str_out, this->u_ad_bus); hw_tty.print(str_out); hw_tty.print("\n");		
-		//sprintf(str_out, "OPCODE: %02x (cycle %02x)\n", (this->u_ad_bus / 64), (this->u_ad_bus % 64)); hw_tty.print(str_out);
-		//hw_tty.print("microcode: \n");
-		this->rom.display_current_cycles_desc((this->u_ad_bus / 64), (this->u_ad_bus % 64), hw_tty);
-		hw_tty.print("\n");
-	}
 }
 
 // Sets Microcode from Rom
@@ -368,6 +295,7 @@ void BAFFA1_MICROCODE::load_microcode_from_rom() {
 
 		// ROM 0
 		controller_bus.next = this->rom.roms[0][this->u_ad_bus] & 0b00000011;///////////////////////
+		// changes MUX
 
 		// ROM 1
 		controller_bus.u_offset = ((this->rom.roms[1][this->u_ad_bus] & 0b00000001) << 6) | ((this->rom.roms[0][this->u_ad_bus] >> 2) & 0b00111111);////////////////////
@@ -482,6 +410,7 @@ void BAFFA1_MICROCODE::load_microcode_from_rom() {
 	else {
 		// ROM 0
 		controller_bus.next = 0;
+		//change MUX
 
 		// ROM 1
 		controller_bus.u_offset = 0;
@@ -529,7 +458,7 @@ void BAFFA1_MICROCODE::load_microcode_from_rom() {
 		controller_bus.ch_wrt = 0;
 
 		// ROM 8
-		controller_bus.bl_wrt = 0; 
+		controller_bus.bl_wrt = 0;
 		controller_bus.bh_wrt = 0;
 		controller_bus.al_wrt = 0;
 		controller_bus.ah_wrt = 0;
@@ -543,7 +472,7 @@ void BAFFA1_MICROCODE::load_microcode_from_rom() {
 		controller_bus.tdrl_wrt = 0;
 		controller_bus.tdrh_wrt = 0;
 		controller_bus.dil_wrt = 0;
-		controller_bus.dih_wrt = 0; 
+		controller_bus.dih_wrt = 0;
 		controller_bus.sil_wrt = 0;
 		controller_bus.sih_wrt = 0;
 		controller_bus.marl_wrt = 0;
@@ -594,4 +523,91 @@ void BAFFA1_MICROCODE::load_microcode_from_rom() {
 
 	}
 }
+
+// Sets Microcode
+void BAFFA1_MICROCODE::sequencer_update(BAFFA1_BYTE reg_status_value) {
+
+	this->u_adder_refresh();
+
+	//CLOCK LOW
+	this->addresser(reg_status_value); // Sets u-address
+
+	this->load_microcode_from_rom(); // Sets Microcode from Rom
+}
+
+
+
+
+void BAFFA1_MICROCODE::debugger(BAFFA1_CONFIG& config, HW_TTY& hw_tty) {
+	if (config.DEBUG_UADDRESSER) {
+		char str_out[255];
+		hw_tty.print("***** U_ADDRESSER\n");
+		/*
+		hw_tty.print("* Next(typ): "); print_nibble_bin(str_out, controller_bus.next); hw_tty.print(str_out);
+		hw_tty.print(" | Any Interruption: "); print_nibble_bin(str_out, any_interruption(reg_status_value)); hw_tty.print(str_out);
+		//hw_tty.print(" | Mux_B: "); print_nibble_bin(str_out, mux_B); hw_tty.print(str_out);
+		//hw_tty.print(" | Mux_A: "); print_nibble_bin(str_out, mux_A); hw_tty.print(str_out);
+		hw_tty.print("\n");
+		*/
+
+		/*
+		hw_tty.print("* "); print_byte_bin(str_out, in01_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in01_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res01); hw_tty.print(str_out); hw_tty.print("\n");
+		hw_tty.print("* "); print_byte_bin(str_out, in02_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in02_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res02); hw_tty.print(str_out); hw_tty.print("\n");
+		hw_tty.print("* "); print_byte_bin(str_out, in03_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in03_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res03); hw_tty.print(str_out); hw_tty.print("\n");
+		hw_tty.print("* "); print_byte_bin(str_out, in04_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in04_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res04); hw_tty.print(str_out); hw_tty.print("\n");
+		hw_tty.print("* "); print_byte_bin(str_out, in05_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in05_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res05); hw_tty.print(str_out); hw_tty.print("\n");
+		hw_tty.print("* "); print_byte_bin(str_out, in06_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in06_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_binstr_out, res06); hw_tty.print(str_out); hw_tty.print("\n");
+		hw_tty.print("* "); print_byte_bin(str_out, in07_A); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, in07_B); hw_tty.print(str_out); hw_tty.print(" | "); print_byte_bin(str_out, res07); hw_tty.print(str_out); hw_tty.print("\n");
+		*/
+		sprintf(str_out, "* U_ADDRESS=%04x", BAFFA1_REGISTERS::value(this->U_ADDRESSl, this->U_ADDRESSh)); hw_tty.print(str_out);
+		hw_tty.print(" | ");
+		sprintf(str_out, "U_AD=%04x", this->u_ad_bus); hw_tty.print(str_out);
+		hw_tty.print(" | ");
+		hw_tty.print("Mux: "); print_nibble_bin(str_out, this->controller_bus.mux); hw_tty.print(str_out);
+		hw_tty.print("\n");
+
+		hw_tty.print("\n");
+	}
+	if (config.DEBUG_MICROCODE) {
+		//char str_out[255];
+		hw_tty.print("***** MICROCODE\n");
+		//hw_tty.print("U-ADDRESS: ");  print_word_bin(str_out, this->u_ad_bus); hw_tty.print(str_out); hw_tty.print("\n");		
+		//sprintf(str_out, "OPCODE: %02x (cycle %02x)\n", (this->u_ad_bus / 64), (this->u_ad_bus % 64)); hw_tty.print(str_out);
+		//hw_tty.print("microcode: \n");
+		this->rom.display_current_cycles_desc((this->u_ad_bus / 64), (this->u_ad_bus % 64), hw_tty);
+		hw_tty.print("\n");
+
+	}
+	if (config.DEBUG_UADDRESSER) {
+		char str_out[255];
+		hw_tty.print("***** U_ADDRESSER\n");
+		hw_tty.print("* Next(typ): "); print_nibble_bin(str_out, controller_bus.next); hw_tty.print(str_out);
+		hw_tty.print(" | Any Interruption: "); print_nibble_bin(str_out, this->controller_bus.any_interruption); hw_tty.print(str_out);
+		//hw_tty.print(" | Mux_B: "); print_nibble_bin(str_out, mux_B); hw_tty.print(str_out);
+		//hw_tty.print(" | Mux_A: "); print_nibble_bin(str_out, mux_A); hw_tty.print(str_out);
+		hw_tty.print("\n");
+	}
+	if (config.DEBUG_UADDER) {
+		hw_tty.print("***** U_ADDER\n");
+		
+		BAFFA1_BYTE typ = controller_bus.next;
+		char str_out[255];
+		hw_tty.print("* next(typ): "); print_nibble_bin(str_out, typ); hw_tty.print(str_out);
+		hw_tty.print(" | ");
+		hw_tty.print(" u_offset: "); print_byte_bin(str_out, controller_bus.u_offset); hw_tty.print(str_out);
+		hw_tty.print(" | ");
+		hw_tty.print("Final Condition : "); print_nibble_bin(str_out, controller_bus.final_condition); hw_tty.print(str_out);
+		hw_tty.print("\n");
+
+		hw_tty.print("* A(u_ad): ");  print_word_bin_nibbles(str_out, this->u_ad_bus); hw_tty.print(str_out);
+		hw_tty.print("\n");
+		hw_tty.print("* B: ");  print_word_bin_nibbles(str_out, this->u_adder_b); hw_tty.print(str_out);
+		hw_tty.print("\n");
+		hw_tty.print("* u_adder: ");  print_word_bin(str_out, this->u_adder); hw_tty.print(str_out);
+		hw_tty.print("\n");
+		hw_tty.print("\n");
+	}
+
+}
+
 

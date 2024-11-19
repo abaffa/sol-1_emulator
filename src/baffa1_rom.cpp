@@ -157,7 +157,7 @@ void BAFFA1_ROM::display_current_cycles(BAFFA1_BYTE opcode, BAFFA1_BYTE cycle, B
 
 				int c_rom = (j + 24 * k) / 8;
 				int c_p = opcode * BAFFA1_ROM_CYCLES_PER_INSTR + cycle;
-				char c_bit = pow(2, (j + 24 * k) % 8);
+				char c_bit = (char)pow(2, (j + 24 * k) % 8);
 				unsigned char c_byte = this->roms[c_rom][c_p];
 
 				char* tmp = (char*)malloc(strlen(BAFFA1_ROM_CONTROL_LIST[j + 24 * k] + 1));

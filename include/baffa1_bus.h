@@ -30,7 +30,7 @@ public:
 	BAFFA1_BYTE k_bus; // input pra alu k -> y
 	BAFFA1_BYTE w_bus; // input pra alu w -> x
 	
-	struct baffa1_alu_bus alu_bus;
+	BAFFA1_ALU_BUS alu_bus;
 
 	/////
 	BAFFA1_BYTE bus_tristate(BAFFA1_REGISTERS& baffa1_registers);

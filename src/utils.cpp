@@ -212,44 +212,30 @@ unsigned int convert_hexstr_to_value(char *value) {
 
 
 BAFFA1_DWORD get_word_bit(BAFFA1_DWORD v, int bit) {
-	if (bit == 0)
-		return v & 0b0000000000000001;
+	if (bit == 0) return v & 0b0000000000000001;
 
-	return (v & (0b0000000000000001 << bit)) >> bit;
+	//return (v & (0b0000000000000001 << bit)) >> bit;
+	return (v & (0b0000000000000001 << bit)) != 0b0;
 }
-
-
-BAFFA1_BYTE get_byte_bit(BAFFA1_BYTE v, int bit) {
-	if (bit == 0)
-		return v & 0b00000001;
-
-	return (v & (0b00000001 << bit)) >> bit;
-}
-
-BAFFA1_BYTE check_byte_bit(BAFFA1_BYTE v, int bit) {
-	if (bit == 0)
-		return (v & 0b00000001) != 0x00;
-
-	return (v & (0b00000001 << bit)) != 0x00;
-}
-
-
-BAFFA1_BYTE set_byte_bit(BAFFA1_BYTE v, int bit) {
-	if (bit == 0)
-		return v & 0b00000001;
-
-	return (v & 0b00000001) << bit;
-}
-
 
 BAFFA1_DWORD set_word_bit(BAFFA1_DWORD v, int bit) {
-	if (bit == 0)
-		return v & 0b00000001;
+	if (bit == 0) return v & 0b0000000000000001;
+
+	return (v & 0b0000000000000001) << bit;
+}
+
+BAFFA1_BYTE get_byte_bit(BAFFA1_BYTE v, int bit) {
+	if (bit == 0) return v & 0b00000001;
+
+	//return (v & (0b00000001 << bit)) >> bit;
+	return (v & (0b00000001 << bit)) != 0b0;
+}
+
+BAFFA1_BYTE set_byte_bit(BAFFA1_BYTE v, int bit) {
+	if (bit == 0) return v & 0b00000001;
 
 	return (v & 0b00000001) << bit;
 }
-
-
 
 
 char* loadfile(char *s, char *filename, long *size) {

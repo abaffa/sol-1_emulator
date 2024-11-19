@@ -50,7 +50,7 @@
 
 #define SERVER_PORT 20248
 
-#define PANEL_ENABLED 1
+#define PANEL_ENABLED 0
 
 #define INI_SERVER 1
 #define INI_WEB_SERVER 0

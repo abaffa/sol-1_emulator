@@ -23,11 +23,11 @@
 
 #include "queue_ll.h"
 
-#if defined(__linux__) || defined(__MINGW32__)
+#if defined(__linux__)
 #include <sys/socket.h> 
 #include <arpa/inet.h>
-#else
 
+#else // || defined(__MINGW32__)
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -47,12 +47,12 @@ struct hw_web_client {
 
 	int running;
 	int index;
-#ifdef _MSC_VER    
+#if defined(_MSC_VER) || defined(__MINGW32__)
 	SOCKET *client;
 #else
 	int *client;
 #endif
-	struct hw_uart* hw_uart;
+	hw_uart* _hw_uart;
 	Queue* web_out;
 
 };
@@ -73,9 +73,9 @@ public:
 	HW_WEB() {
 		this->currentline = "";
 	}
-	//void init(BAFFA1_CPU& baffa1_cpu, struct hw_uart *hw_uart);
+	//void init(BAFFA1_CPU& baffa1_cpu, hw_uart *hw_uart);
 	void new_char(BAFFA1_BYTE c);
-	void start_server(BAFFA1_CPU& baffa1_cpu, struct hw_uart* hw_uart);
+	void start_server(BAFFA1_CPU& baffa1_cpu, hw_uart* hw_uart);
 
 };
 #endif

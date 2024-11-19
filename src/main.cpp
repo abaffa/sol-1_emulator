@@ -19,8 +19,7 @@
 #include <stdlib.h>
 #include "baffa1_computer.h"
 
-#ifdef __MINGW32__
-
+#if defined(__linux__) || defined(__MINGW32__)
 
 
 int main(int argc, char** argv) {
@@ -36,6 +35,8 @@ int main(int argc, char** argv) {
 
 	}
 
+	return 0;
+}
 #elif _MSC_VER        
 
 #include <windows.h>
@@ -152,7 +153,7 @@ static void button_process_event(button_t *btn, const SDL_Event *ev) {
 	}
 }
 
-#include "baffa1_alu_bus.h"
+#include "BAFFA1_ALU_BUS.h"
 #include "baffa1_controller_bus.h"
 int main(int argc, char** argv) {
 
@@ -386,7 +387,7 @@ int main(int argc, char** argv) {
 
 
 
-			long  address_bus = baffa1_computer.read_address_bus();
+			long  address_bus = baffa1_computer.cpu.memory.read_address_bus(baffa1_computer.bus.bus_tristate(baffa1_computer.cpu.registers), baffa1_computer.cpu.microcode, baffa1_computer.cpu.registers);
 			BAFFA1_BYTE data_bus = baffa1_computer.bus.data_bus;
 			BAFFA1_BYTE ir = baffa1_computer.cpu.microcode.IR.value();
 			BAFFA1_BYTE w = baffa1_computer.bus.w_bus;
@@ -529,8 +530,6 @@ int main(int argc, char** argv) {
 				//printf("\ndma req\n");
 				baffa1_computer.cpu.microcode.controller_bus.dma_req = get_byte_bit((~baffa1_computer.cpu.microcode.controller_bus.dma_req), 0);
 			}
-
-
 
 
 			for (i = 7; i >= 0; i--)

@@ -18,11 +18,13 @@
 #ifndef HWUART_H
 #define HWUART_H
 
+#include <cstdint>
 #include <queue>
 
-#if defined(__linux__) || defined(__MINGW32__)
+#if defined(__linux__)
 #include <fcntl.h>
-#else
+
+#else // || defined(__MINGW32__)
 #include <mutex> 
 #endif
 

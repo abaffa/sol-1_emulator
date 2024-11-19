@@ -39,11 +39,7 @@ const char* BAFFA1_ROM_CONTROL_LIST[] = {
 */
 
 void BAFFA1_CPU::init(HW_TTY& hw_tty)
-{
-
-	
-
-	this->alu.baffa1_alu_init();
+{	this->alu.baffa1_alu_init();
 
 	this->microcode.init(hw_tty);
 
@@ -116,7 +112,7 @@ void BAFFA1_CPU::reset()
 void BAFFA1_CPU::display_registers(HW_TTY& hw_tty) {
 
 	BAFFA1_MWORD memADDR = BAFFA1_REGISTERS::value(this->registers.PCl, this->registers.PCh);
-	BAFFA1_BYTE opcode = get_current_memory()[memADDR];
+	BAFFA1_BYTE opcode = get_current_memory().read(memADDR);
 
 	char str_out[255];
 
@@ -155,15 +151,15 @@ void BAFFA1_CPU::display_registers(HW_TTY& hw_tty) {
 	sprintf(str_out, "@PC=%02x:%s", opcode, &this->microcode.rom.rom_desc[0x400000 + (opcode * 256)]); hw_tty.print(str_out);
 
 	if (memADDR < get_current_memory_size() - 3) {
-		sprintf(str_out, " [%02x%02x%02x]", get_current_memory()[memADDR], get_current_memory()[memADDR + 1], get_current_memory()[memADDR + 2]); hw_tty.print(str_out);
+		sprintf(str_out, " [%02x%02x%02x]", get_current_memory().read(memADDR), get_current_memory().read(memADDR + 1), get_current_memory().read(memADDR + 2)); hw_tty.print(str_out);
 	}
 	else if (memADDR < get_current_memory_size() - 2) {
-		sprintf(str_out, " [%02x%02x]", get_current_memory()[memADDR],
-			get_current_memory()[memADDR + 1]
+		sprintf(str_out, " [%02x%02x]", get_current_memory().read(memADDR),
+			get_current_memory().read(memADDR + 1)
 		); hw_tty.print(str_out);
 	}
 	else if (memADDR < get_current_memory_size() - 1) {
-		sprintf(str_out, " [%02x]", get_current_memory()[memADDR]);
+		sprintf(str_out, " [%02x]", get_current_memory().read(memADDR));
 		hw_tty.print(str_out);
 	}
 
@@ -204,20 +200,20 @@ void BAFFA1_CPU::display_registers_lite(HW_TTY& hw_tty) {
 
 
 	BAFFA1_MWORD memADDR = BAFFA1_REGISTERS::value(this->registers.PCl, this->registers.PCh);
-	BAFFA1_BYTE opcode = get_current_memory()[memADDR];
+	BAFFA1_BYTE opcode = get_current_memory().read(memADDR);
 
 	sprintf(str_out, "@PC=%02x:%s", opcode, &this->microcode.rom.rom_desc[0x400000 + (opcode * 256)]); hw_tty.print(str_out);
 
 	if (memADDR < get_current_memory_size() - 3) {
-		sprintf(str_out, " [%02x%02x%02x]", get_current_memory()[memADDR], get_current_memory()[memADDR + 1], get_current_memory()[memADDR + 2]); hw_tty.print(str_out);
+		sprintf(str_out, " [%02x%02x%02x]", get_current_memory().read(memADDR), get_current_memory().read(memADDR + 1), get_current_memory().read(memADDR + 2)); hw_tty.print(str_out);
 	}
 	else if (memADDR < get_current_memory_size() - 2) {
-		sprintf(str_out, " [%02x%02x]", get_current_memory()[memADDR],
-			get_current_memory()[memADDR + 1]
+		sprintf(str_out, " [%02x%02x]", get_current_memory().read(memADDR),
+			get_current_memory().read(memADDR + 1)
 		); hw_tty.print(str_out);
 	}
 	else if (memADDR < get_current_memory_size() - 1) {
-		sprintf(str_out, " [%02x]", get_current_memory()[memADDR]);
+		sprintf(str_out, " [%02x]", get_current_memory().read(memADDR));
 		hw_tty.print(str_out);
 	}
 
@@ -256,7 +252,7 @@ void BAFFA1_CPU::display_registers_lite(HW_TTY& hw_tty) {
 void  BAFFA1_CPU::memory_display(HW_TTY& hw_tty)
 {
 	char str_out[255];
-	int i = 0, j = 0;
+	unsigned int i = 0, j = 0;
 	BAFFA1_DWORD PC = BAFFA1_REGISTERS::value(this->registers.PCl, this->registers.PCh);
 
 	if (this->memory.debug_manual_offset == 0x00) {
@@ -279,20 +275,20 @@ void  BAFFA1_CPU::memory_display(HW_TTY& hw_tty)
 			else
 				hw_tty.print("  ");
 		if (PC == i || PC - 1 == i) {
-			sprintf(str_out, "%02x*", this->memory.mem_bios[i]); hw_tty.print(str_out);
+			sprintf(str_out, "%02x*", this->memory.rom_bios.read(i)); hw_tty.print(str_out);
 		}
 		else {
-			sprintf(str_out, "%02x ", this->memory.mem_bios[i]); hw_tty.print(str_out);
+			sprintf(str_out, "%02x ", this->memory.rom_bios.read(i)); hw_tty.print(str_out);
 		}
 
 		if ((i + 1) % 16 == 0 && i <= 255 + this->memory.debug_mem_offset) {
 			hw_tty.print("  |");
 			for (j = (i + 1) - 16; j < (i + 1); j++) {
-				if (this->memory.mem_bios[j] < 0x20) {
+				if (this->memory.rom_bios.read(j) < 0x20) {
 					hw_tty.print(".");
 				}
 				else {
-					sprintf(str_out, "%c", this->memory.mem_bios[j]); hw_tty.print(str_out);
+					sprintf(str_out, "%c", this->memory.rom_bios.read(j)); hw_tty.print(str_out);
 				}
 			}
 			hw_tty.print("|");
@@ -311,10 +307,10 @@ void  BAFFA1_CPU::memory_display(HW_TTY& hw_tty)
 
 
 
-BAFFA1_BYTE *BAFFA1_CPU::get_current_memory() {
-	BAFFA1_BYTE *memory;
-	if (!check_byte_bit(this->registers.MSWl.value(), MSWl_PAGING_EN))
-		memory = this->memory.mem_bios;
+Memory BAFFA1_CPU::get_current_memory() {
+	Memory memory;
+	if (!get_byte_bit(this->registers.MSWl.value(), MSWl_PAGING_EN))
+		memory = this->memory.rom_bios;
 
 	else
 		memory = this->memory.low_memory;
@@ -324,13 +320,13 @@ BAFFA1_BYTE *BAFFA1_CPU::get_current_memory() {
 
 
 
-int BAFFA1_CPU::get_current_memory_size() {
+unsigned int BAFFA1_CPU::get_current_memory_size() {
 
-	if (!check_byte_bit(this->registers.MSWl.value(), MSWl_PAGING_EN))
-		return BAFFA1_BIOS_MEMORY_SIZE;
+	if (!get_byte_bit(this->registers.MSWl.value(), MSWl_PAGING_EN))
+		return  this->memory.rom_bios.size;
 
 	else
-		return BAFFA1_MAIN_MEMORY_SIZE;
+		return this->memory.rom_bios.size;
 }
 
 

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\baffa1_alu_bus.cpp" />
     <ClCompile Include="..\..\..\src\debugmenu_main.cpp" />
     <ClCompile Include="..\..\..\src\debugmenu_roms.cpp" />
     <ClCompile Include="..\..\..\src\hw_rtc.cpp" />
@@ -27,9 +28,10 @@
     <ClCompile Include="..\..\..\src\hw_uart.cpp" />
     <ClCompile Include="..\..\..\src\hw_web.cpp" />
     <ClCompile Include="..\..\..\src\linkedlist.cpp" />
+    <ClCompile Include="..\..\..\src\memory.cpp" />
     <ClCompile Include="..\..\..\src\queue_ll.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
-    <ClCompile Include="..\..\..\src\baffa1_alu.cpp" />
+    <ClCompile Include="..\..\..\src\baffa1_alu_board.cpp" />
     <ClCompile Include="..\..\..\src\baffa1_alu_4bit.cpp" />
     <ClCompile Include="..\..\..\src\hw_ide.cpp" />
     <ClCompile Include="..\..\..\src\baffa1_bus.cpp" />
@@ -39,7 +41,7 @@
     <ClCompile Include="..\..\..\src\baffa1_register_8bit.cpp" />
     <ClCompile Include="..\..\..\src\baffa1_rom.cpp" />
     <ClCompile Include="..\..\..\src\baffa1_cpu.cpp" />
-    <ClCompile Include="..\..\..\src\baffa1_memory.cpp" />
+    <ClCompile Include="..\..\..\src\baffa1_memory_board.cpp" />
     <ClCompile Include="..\..\..\src\tasm_opcode.cpp" />
     <ClCompile Include="..\..\..\src\utils.cpp" />
   </ItemGroup>
@@ -55,6 +57,7 @@
     <ClInclude Include="..\..\..\include\hw_uart.h" />
     <ClInclude Include="..\..\..\include\hw_web.h" />
     <ClInclude Include="..\..\..\include\linkedlist.h" />
+    <ClInclude Include="..\..\..\include\memory.h" />
     <ClInclude Include="..\..\..\include\queue_ll.h" />
     <ClInclude Include="..\..\..\include\SDL2\begin_code.h" />
     <ClInclude Include="..\..\..\include\SDL2\close_code.h" />
@@ -133,7 +136,7 @@
     <ClInclude Include="..\..\..\include\SDL2\SDL_version.h" />
     <ClInclude Include="..\..\..\include\SDL2\SDL_video.h" />
     <ClInclude Include="..\..\..\include\SDL2\SDL_vulkan.h" />
-    <ClInclude Include="..\..\..\include\baffa1_alu.h" />
+    <ClInclude Include="..\..\..\include\baffa1_alu_board.h" />
     <ClInclude Include="..\..\..\include\baffa1_alu_4bit.h" />
     <ClInclude Include="..\..\..\include\hw_ide.h" />
     <ClInclude Include="..\..\..\include\baffa1_alu_bus.h" />
@@ -146,7 +149,7 @@
     <ClInclude Include="..\..\..\include\baffa1_cpu.h" />
     <ClInclude Include="..\..\..\include\tasm_opcode.h" />
     <ClInclude Include="..\..\..\include\utils.h" />
-    <ClInclude Include="..\..\..\include\baffa1_memory.h" />
+    <ClInclude Include="..\..\..\include\baffa1_memory_board.h" />
     <ClInclude Include="..\..\..\include\baffa1_registers.h" />
   </ItemGroup>
   <ItemGroup>
@@ -246,6 +249,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Resource>
+    <None Include="..\..\..\Baffa-1_Schematics.pdf" />
     <None Include="packages.config" />
     <Resource Include="tasm1.tab">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -317,9 +321,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>D:\Backup\Develop\emudev2\emudev\baffa-1_emulator\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>D:\Backup\Develop\emudev2\emudev\baffa-1_emulator\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -333,7 +339,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <CompileAs>Default</CompileAs>
@@ -351,7 +357,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -369,7 +375,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -386,7 +392,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

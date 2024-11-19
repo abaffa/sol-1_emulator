@@ -33,15 +33,15 @@ void hw_ide_init(struct hw_ide* hw_ide) {
 }
 
 void hw_ide_reset(struct hw_ide* hw_ide) {
-	hw_ide->gambi_ide_total = 0;
-	hw_ide->gambi_ide_read = 0;
+	hw_ide->ide_total_block_bytes = 0;
+	hw_ide->ide_read_count = 0;
 }
 
 
 void hw_ide_write(struct hw_ide* hw_ide) {
 	if (hw_ide->data[7] == 0b00001000) {
 
-		hw_ide->gambi_ide_total = hw_ide->data[2];
+		hw_ide->ide_total_block_bytes = hw_ide->data[2];
 
 		unsigned long sec_address_lba = hw_ide->data[3];
 		sec_address_lba = sec_address_lba | ((unsigned long)hw_ide->data[4]) << 8;
@@ -51,11 +51,11 @@ void hw_ide_write(struct hw_ide* hw_ide) {
 		unsigned long sec_address_byte = sec_address_lba * 512;
 
 		if (sec_address_byte < BAFFA1_IDE_MEMORY_SIZE) {
-			hw_ide->memory[sec_address_byte + hw_ide->gambi_ide_read] = hw_ide->data[0];
+			hw_ide->memory[sec_address_byte + hw_ide->ide_read_count] = hw_ide->data[0];
 
-			hw_ide->gambi_ide_read++;
+			hw_ide->ide_read_count++;
 
-			if (hw_ide->gambi_ide_read > hw_ide->gambi_ide_total * 512)
+			if (hw_ide->ide_read_count > hw_ide->ide_total_block_bytes * 512)
 			{
 				hw_ide->data[7] = 0x00;
 				hw_ide_reset(hw_ide);
@@ -75,7 +75,7 @@ void hw_ide_read(struct hw_ide* hw_ide) {
 
 	if (hw_ide->data[7] == 0b00001000) {
 
-		hw_ide->gambi_ide_total = hw_ide->data[2];
+		hw_ide->ide_total_block_bytes = hw_ide->data[2];
 
 		unsigned long sec_address_lba = hw_ide->data[3];
 		sec_address_lba = sec_address_lba | ((unsigned long)hw_ide->data[4]) << 8;
@@ -85,11 +85,11 @@ void hw_ide_read(struct hw_ide* hw_ide) {
 		unsigned long sec_address_byte = sec_address_lba * 512;
 
 		if (sec_address_byte < BAFFA1_IDE_MEMORY_SIZE) {
-			hw_ide->data[0] = hw_ide->memory[sec_address_byte + hw_ide->gambi_ide_read];
+			hw_ide->data[0] = hw_ide->memory[sec_address_byte + hw_ide->ide_read_count];
 
-			hw_ide->gambi_ide_read++;
+			hw_ide->ide_read_count++;
 
-			if (hw_ide->gambi_ide_read > hw_ide->gambi_ide_total * 512)
+			if (hw_ide->ide_read_count > hw_ide->ide_total_block_bytes * 512)
 			{
 				hw_ide->data[7] = 0x00;
 				hw_ide_reset(hw_ide);
@@ -115,6 +115,15 @@ void hw_ide_save_disk(BAFFA1_BYTE *data) {
 
 void hw_ide_load_disk(BAFFA1_BYTE *data) {
 	FILE *file = fopen("data.dsk", "rb");
+	if (file != NULL) {
+		fread(data, sizeof(BAFFA1_BYTE), BAFFA1_IDE_MEMORY_SIZE, file);
+		fclose(file);
+	}
+}
+
+
+void hw_ide_load_bkpdisk(BAFFA1_BYTE *data) {
+	FILE *file = fopen("data_bkp.dsk", "rb");
 	if (file != NULL) {
 		fread(data, sizeof(BAFFA1_BYTE), BAFFA1_IDE_MEMORY_SIZE, file);
 		fclose(file);

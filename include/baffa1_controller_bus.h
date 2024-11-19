@@ -147,6 +147,10 @@ struct baffa1_controller_bus {
 	//?????????????
 
 
+	//
+	BAFFA1_BYTE mux;
+	BAFFA1_BYTE any_interruption;
+	BAFFA1_BYTE int_pending;
 
 	//
 
@@ -179,7 +183,7 @@ struct baffa1_controller_bus {
 	BAFFA1_BYTE panel_step = 0;
 	BAFFA1_BYTE panel_microcodestep = 0;
 
-	BAFFA1_BYTE clk = 0;
+	BAFFA1_BYTE clk = 1;
 
 
 	BAFFA1_BYTE reset = 0;

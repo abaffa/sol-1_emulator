@@ -85,7 +85,7 @@ BAFFA1_DWORD set_word_bit(BAFFA1_DWORD v, int bit);
 
 BAFFA1_DWORD get_word_bit(BAFFA1_DWORD v, int bit);
 BAFFA1_BYTE get_byte_bit(BAFFA1_BYTE v, int bit);
-BAFFA1_BYTE check_byte_bit(BAFFA1_BYTE v, int bit);
+BAFFA1_BYTE get_byte_bit(BAFFA1_BYTE v, int bit);
 BAFFA1_BYTE set_byte_bit(BAFFA1_BYTE v, int bit);
 
 char* loadfile(char *s, char *filename, long *size);

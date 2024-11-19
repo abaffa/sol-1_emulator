@@ -61,22 +61,9 @@ BAFFA1_BYTE BAFFA1_BUS::bus_mem_io(BAFFA1_REGISTERS& baffa1_registers, BAFFA1_BY
 
 
 void BAFFA1_BUS::init() {
-	this->data_bus = 0b00000000;
-	this->k_bus = 0b00000000; // input pra alu x e y
-	this->w_bus = 0b00000000; // input pra alu x e y
-
-	this->alu_bus.x_bus = 0b00000000; //alu entrada
-	this->alu_bus.y_bus = 0b00000000; //alu entrada
-	this->alu_bus.z_bus = 0b00000000; //alu saida
-
-
-	// flags do alu
-	this->alu_bus.alu_zf = 0x00; // ZeroFlag
-	this->alu_bus.alu_cf = 0x00; // Carry Flag
-	this->alu_bus.alu_of = 0x00; // Overflow Flag
-
-	this->alu_bus.alu_final_cf = 0x00;
-	this->alu_bus.alu_output = 0x00;
+	this->reset();
+	
+	this->alu_bus.init(); // flags do alu
 }
 
 void BAFFA1_BUS::reset() {
@@ -84,9 +71,7 @@ void BAFFA1_BUS::reset() {
 	this->k_bus = 0b00000000; // input pra alu x e y
 	this->w_bus = 0b00000000; // input pra alu x e y
 	
-	this->alu_bus.x_bus = 0b00000000; //alu entrada
-	this->alu_bus.y_bus = 0b00000000; //alu entrada
-	this->alu_bus.z_bus = 0b00000000; //alu saida
+	this->alu_bus.reset();
 }
 
 
@@ -119,14 +104,14 @@ BAFFA1_BYTE BAFFA1_BUS::w_bus_refresh(
 	//IC30  //IC130 //IC56  //IC62 //IC53 //IC133 //IC68  //IC69 //IC67 //IC141 //IC81
 	//IC82  //IC71  //IC144 //IC85 //IC86 //IC84  //IC152 //IC88 //IC89 //IC86  //IC160
 
-	char str_out[255];
+	//char str_out[255];
 
 	BAFFA1_BYTE w_bus = 0x00;
 
 	BAFFA1_BYTE inABC = 0x00;
 	BAFFA1_BYTE inAB = 0x00;
 
-	if (bus_tristate(baffa1_registers) == 0x00 & display_reg_load == 0x00) {
+	if ((bus_tristate(baffa1_registers) == 0x00) & (display_reg_load == 0x00)) {
 		inABC = alu_a_src & 0b00000111;
 		inAB = get_byte_bit(alu_a_src, 3) | set_byte_bit(get_byte_bit(alu_a_src, 4), 1);
 	}
@@ -277,7 +262,7 @@ BAFFA1_BYTE BAFFA1_BUS::x_bus_refresh(BAFFA1_REGISTERS& baffa1_registers,
 
 	BAFFA1_BYTE x_bus = 0x00;
 
-	if (!check_byte_bit(alu_a_src, 5))
+	if (!get_byte_bit(alu_a_src, 5))
 		x_bus = w_bus;
 
 	else {
