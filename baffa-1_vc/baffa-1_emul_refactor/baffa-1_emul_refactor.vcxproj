@@ -281,6 +281,10 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\sdl2.redist.2.0.5\build\native\sdl2.redist.targets" Condition="Exists('packages\sdl2.redist.2.0.5\build\native\sdl2.redist.targets')" />
     <Import Project="packages\sdl2.2.0.5\build\native\sdl2.targets" Condition="Exists('packages\sdl2.2.0.5\build\native\sdl2.targets')" />
+    <Import Project="..\packages\sdl2.new.redist.2.0.8\build\native\sdl2.new.redist.targets" Condition="Exists('..\packages\sdl2.new.redist.2.0.8\build\native\sdl2.new.redist.targets')" />
+    <Import Project="..\packages\sdl2.new.2.0.8\build\native\sdl2.new.targets" Condition="Exists('..\packages\sdl2.new.2.0.8\build\native\sdl2.new.targets')" />
+    <Import Project="..\packages\vii.SDL2_image.redist.2.0.3\build\native\vii.SDL2_image.redist.targets" Condition="Exists('..\packages\vii.SDL2_image.redist.2.0.3\build\native\vii.SDL2_image.redist.targets')" />
+    <Import Project="..\packages\vii.SDL2_image.2.0.3\build\native\vii.SDL2_image.targets" Condition="Exists('..\packages\vii.SDL2_image.2.0.3\build\native\vii.SDL2_image.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -288,5 +292,9 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\sdl2.redist.2.0.5\build\native\sdl2.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\sdl2.redist.2.0.5\build\native\sdl2.redist.targets'))" />
     <Error Condition="!Exists('packages\sdl2.2.0.5\build\native\sdl2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\sdl2.2.0.5\build\native\sdl2.targets'))" />
+    <Error Condition="!Exists('..\packages\sdl2.new.redist.2.0.8\build\native\sdl2.new.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\sdl2.new.redist.2.0.8\build\native\sdl2.new.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\sdl2.new.2.0.8\build\native\sdl2.new.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\sdl2.new.2.0.8\build\native\sdl2.new.targets'))" />
+    <Error Condition="!Exists('..\packages\vii.SDL2_image.redist.2.0.3\build\native\vii.SDL2_image.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\vii.SDL2_image.redist.2.0.3\build\native\vii.SDL2_image.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\vii.SDL2_image.2.0.3\build\native\vii.SDL2_image.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\vii.SDL2_image.2.0.3\build\native\vii.SDL2_image.targets'))" />
   </Target>
 </Project>
