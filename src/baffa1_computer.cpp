@@ -776,6 +776,7 @@ void BAFFA1_COMPUTER::clock_low() {
 	
 }
 
+
 void BAFFA1_COMPUTER::debug_cycle() {
 	////////////////////////////////////////////////////////////////////////////
 	// DEBUG
