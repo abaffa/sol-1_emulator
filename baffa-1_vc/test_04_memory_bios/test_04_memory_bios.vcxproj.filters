@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="baffa1_rom.cpp">
+      <Filter>Source Files\rom</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_data_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_controller_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_register_8bit.cpp">
+      <Filter>Source Files\registers</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_alu_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_registers_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_memory_bios.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_memory.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_interruptions_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="baffa1_rom.h">
+      <Filter>Header Files\rom</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_register_8bit.h">
+      <Filter>Header Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_controller_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_data_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_alu_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_registers_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_memory_bios.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_memory.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_interruptions_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{68792aff-e187-47da-acef-679ab4ce161b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\bus">
+      <UniqueIdentifier>{2bebf805-e66b-4e46-a3ab-736e8329a0ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rom">
+      <UniqueIdentifier>{081b337c-69b6-4282-a640-8a7a34be700c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\registers">
+      <UniqueIdentifier>{4b6914a3-44ff-4189-b549-2098ddf61a55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{1be0492b-4391-40da-93b8-92c838cad54a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\bus">
+      <UniqueIdentifier>{1e0003a3-10f2-4ce9-bbd0-a695adccd0e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\registers">
+      <UniqueIdentifier>{131d7d83-fd82-4fa8-b38f-a51c057e511e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rom">
+      <UniqueIdentifier>{d2ac0588-4b3f-47da-bea6-b8dcfd0c23ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\memory">
+      <UniqueIdentifier>{f01a54cd-67c6-44a4-859f-cca64a138a96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory">
+      <UniqueIdentifier>{2adfe8b9-a221-4aae-80d6-5780d8f276aa}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

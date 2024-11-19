@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\alu">
+      <UniqueIdentifier>{dbba1175-0e4f-42d6-931b-097cd8b5aeee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\bus">
+      <UniqueIdentifier>{8cdfcce7-4412-45c7-a5f2-db9955751549}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\interruptions">
+      <UniqueIdentifier>{0a334096-7a4a-497f-96cc-54066879c306}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\libs">
+      <UniqueIdentifier>{8e456d1c-07fd-4937-8c17-37f7419514fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\memory">
+      <UniqueIdentifier>{256bbc9e-5185-4a39-a2bb-e59d9210e10b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\memory_bios">
+      <UniqueIdentifier>{92966de5-d2fd-4ef4-8e08-05f9d3e5c0d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\microcode">
+      <UniqueIdentifier>{e1528178-6a8a-4545-97cc-e0a6a1b42a0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\peripherals">
+      <UniqueIdentifier>{9e123260-76c7-4979-8d8c-c09b4606f542}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\registers">
+      <UniqueIdentifier>{8efaea20-1a52-4edd-9027-ece000764a33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rom">
+      <UniqueIdentifier>{59b12446-b0a5-4de7-90a0-d03ff82855e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\alu">
+      <UniqueIdentifier>{c5c16e18-3190-4f02-bcf0-0fd21600bc9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\bus">
+      <UniqueIdentifier>{78849a2d-8ec7-4ff1-898f-70c069f8e17a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interruptions">
+      <UniqueIdentifier>{9d82aeac-0046-4474-bb0a-7afc66683d45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libs">
+      <UniqueIdentifier>{53ac8da0-c100-44f1-8573-84b47ef9388a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory">
+      <UniqueIdentifier>{fa31a399-f0d3-4871-aaf2-2d948af5abec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory_bios">
+      <UniqueIdentifier>{9b266c05-6989-45fc-a749-f507fc2fd302}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\microcode">
+      <UniqueIdentifier>{3bff4663-89d2-4e5f-a850-60b84010a17b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\peripherals">
+      <UniqueIdentifier>{d5096d76-5abc-407b-a565-7402c7289910}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\registers">
+      <UniqueIdentifier>{67b56e6c-6a4c-484f-b21a-e09bfefa4d9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rom">
+      <UniqueIdentifier>{d07b2276-4f41-483b-9024-7fe78957a8b4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_alu.cpp">
+      <Filter>Source Files\alu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_alu_4bit.cpp">
+      <Filter>Source Files\alu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_alu_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_controller_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_data_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_interruptions_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_registers_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_interruptions.cpp">
+      <Filter>Source Files\interruptions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\linkedlist.cpp">
+      <Filter>Source Files\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\queue_ll.cpp">
+      <Filter>Source Files\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\tasm_opcode.cpp">
+      <Filter>Source Files\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_memory.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_memory_bios.cpp">
+      <Filter>Source Files\memory_bios</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_microcode.cpp">
+      <Filter>Source Files\microcode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\hw_ide.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\hw_rtc.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\hw_timer.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\hw_tty.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\hw_uart.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\hw_web.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_registers.cpp">
+      <Filter>Source Files\registers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_register_8bit.cpp">
+      <Filter>Source Files\registers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_rom.cpp">
+      <Filter>Source Files\rom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\baffa-1_emul_refactor\baffa1_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_alu.h">
+      <Filter>Header Files\alu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_alu_4bit.h">
+      <Filter>Header Files\alu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_alu_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_data_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_controller_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_interruptions_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_registers_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_interruptions.h">
+      <Filter>Header Files\interruptions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\linkedlist.h">
+      <Filter>Header Files\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\queue_ll.h">
+      <Filter>Header Files\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\tasm_opcode.h">
+      <Filter>Header Files\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_memory.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_memory_bios.h">
+      <Filter>Header Files\memory_bios</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_microcode.h">
+      <Filter>Header Files\microcode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\hw_ide.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\hw_rtc.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\hw_timer.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\hw_tty.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\hw_tty_client.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\hw_uart.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\hw_web.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_registers.h">
+      <Filter>Header Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_register_8bit.h">
+      <Filter>Header Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_rom.h">
+      <Filter>Header Files\rom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\baffa-1_emul_refactor\baffa1_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

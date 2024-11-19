@@ -360,3 +360,8 @@ MigrationBackup/
 /sol-1_vc/sol-1_emul/sol-1_emul/data_atual.dsk
 /sol-1_vc/sol-1_emul/sol-1_emul/data_antes_mkfs.dsk
 /sol-1_vc/sol-1_emul/sol-1_emul/data - Copia.dsk
+/baffa-1_vc/packages
+/baffa-1_vc/baffa-1_emul_refactor/SDL2
+/baffa-1_vc/baffa-1_emul_refactor/x64
+/baffa-1_vc/baffa-1_emul_refactor/Debug
+/baffa-1_vc/baffa-1_emul_refactor/packages

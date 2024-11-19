@@ -1,0 +1,501 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="baffa1_rom.cpp">
+      <Filter>Source Files\rom</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_data_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_controller_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_register_8bit.cpp">
+      <Filter>Source Files\registers</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_alu_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_registers_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_memory.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_interruptions_bus.cpp">
+      <Filter>Source Files\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_microcode.cpp">
+      <Filter>Source Files\microcode</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_alu.cpp">
+      <Filter>Source Files\alu</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_alu_4bit.cpp">
+      <Filter>Source Files\alu</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_registers.cpp">
+      <Filter>Source Files\registers</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_memory_bios.cpp">
+      <Filter>Source Files\memory_bios</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_interruptions.cpp">
+      <Filter>Source Files\interruptions</Filter>
+    </ClCompile>
+    <ClCompile Include="hw_ide.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="hw_rtc.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="hw_timer.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="hw_tty.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="hw_uart.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="hw_web.cpp">
+      <Filter>Source Files\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="linkedlist.cpp">
+      <Filter>Source Files\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="queue_ll.cpp">
+      <Filter>Source Files\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_computer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_cpu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tasm_opcode.cpp">
+      <Filter>Source Files\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="baffa1_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debugmenu_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debugmenu_roms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="baffa1_rom.h">
+      <Filter>Header Files\rom</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_register_8bit.h">
+      <Filter>Header Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_controller_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_data_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_alu_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_registers_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_memory.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_interruptions_bus.h">
+      <Filter>Header Files\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_microcode.h">
+      <Filter>Header Files\microcode</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_alu.h">
+      <Filter>Header Files\alu</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_alu_4bit.h">
+      <Filter>Header Files\alu</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_registers.h">
+      <Filter>Header Files\registers</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_memory_bios.h">
+      <Filter>Header Files\memory_bios</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_interruptions.h">
+      <Filter>Header Files\interruptions</Filter>
+    </ClInclude>
+    <ClInclude Include="hw_ide.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="hw_rtc.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="hw_timer.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="hw_tty.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="hw_tty_client.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="hw_uart.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="hw_web.h">
+      <Filter>Header Files\peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_computer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="baffa1_cpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="linkedlist.h">
+      <Filter>Header Files\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="queue_ll.h">
+      <Filter>Header Files\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="tasm_opcode.h">
+      <Filter>Header Files\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\begin_code.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\close_code.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_assert.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_atomic.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_audio.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_bits.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_blendmode.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_clipboard.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_config.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_cpuinfo.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_egl.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_endian.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_error.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_events.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_filesystem.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_gamecontroller.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_gesture.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_haptic.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_hints.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_image.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_joystick.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_keyboard.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_keycode.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_loadso.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_locale.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_log.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_main.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_messagebox.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_metal.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_misc.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_mouse.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_mutex.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_name.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_opengl.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_opengl_glext.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_opengles.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_opengles2.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_opengles2_gl2.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_opengles2_gl2ext.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_opengles2_gl2platform.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_opengles2_khrplatform.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_pixels.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_platform.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_power.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_quit.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_rect.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_render.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_revision.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_rwops.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_scancode.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_sensor.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_shape.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_stdinc.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_surface.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_system.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_syswm.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_assert.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_common.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_compare.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_crc32.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_font.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_fuzzer.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_harness.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_images.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_log.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_md5.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_memory.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_test_random.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_thread.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_timer.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_touch.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_ttf.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_types.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_version.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_video.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\SDL2\SDL_vulkan.h">
+      <Filter>Header Files\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="debugmenu_main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debugmenu_roms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{68792aff-e187-47da-acef-679ab4ce161b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\bus">
+      <UniqueIdentifier>{2bebf805-e66b-4e46-a3ab-736e8329a0ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rom">
+      <UniqueIdentifier>{081b337c-69b6-4282-a640-8a7a34be700c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\registers">
+      <UniqueIdentifier>{4b6914a3-44ff-4189-b549-2098ddf61a55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{1be0492b-4391-40da-93b8-92c838cad54a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\bus">
+      <UniqueIdentifier>{1e0003a3-10f2-4ce9-bbd0-a695adccd0e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\registers">
+      <UniqueIdentifier>{131d7d83-fd82-4fa8-b38f-a51c057e511e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rom">
+      <UniqueIdentifier>{d2ac0588-4b3f-47da-bea6-b8dcfd0c23ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\memory">
+      <UniqueIdentifier>{f01a54cd-67c6-44a4-859f-cca64a138a96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory">
+      <UniqueIdentifier>{2adfe8b9-a221-4aae-80d6-5780d8f276aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\microcode">
+      <UniqueIdentifier>{00e59109-8bdd-4dd9-b26f-5c54f1361f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\microcode">
+      <UniqueIdentifier>{8a24f9fa-8809-4bda-bba7-4fdf23f733b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\alu">
+      <UniqueIdentifier>{ae70f8ac-0df5-4023-b682-c0a6e29a7d55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\alu">
+      <UniqueIdentifier>{21ff2a8e-9d8c-4517-9fb5-57725e6bc0a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory_bios">
+      <UniqueIdentifier>{6d9d1e7f-4e7c-4a27-bee7-588fb90be26d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\memory_bios">
+      <UniqueIdentifier>{d08b22c2-b4d2-4472-9c4d-422bd30c0923}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interruptions">
+      <UniqueIdentifier>{b73d2aea-a4d2-423e-8dbb-e71cff92ae67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\interruptions">
+      <UniqueIdentifier>{af8195e2-cf79-40ba-a0c0-9c6ec544968a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\peripherals">
+      <UniqueIdentifier>{6066eb3a-83e9-4998-849f-254433656537}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\libs">
+      <UniqueIdentifier>{b4082553-f5d5-4fdd-8c17-c470a98dc141}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libs">
+      <UniqueIdentifier>{da90713c-10ac-44fc-85ea-7c50d05b341a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\peripherals">
+      <UniqueIdentifier>{60ac7fe9-a060-4cbc-944c-9c32b85ed4d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDL2">
+      <UniqueIdentifier>{05abda97-68a2-4b0e-8db9-c5ca42584572}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SDL2">
+      <UniqueIdentifier>{dc27c14c-ac2f-4883-b030-155c6dba42c7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>
